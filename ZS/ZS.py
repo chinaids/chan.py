@@ -4,7 +4,7 @@ from Bi.Bi import CBi
 from BuySellPoint.BSPointConfig import CPointConfig
 from Common.ChanException import CChanException, ErrCode
 from Common.func_util import has_overlap
-from KLine.KLine_Unit import CKLineUnit
+from KLine.KLineUnit import CKLineUnit
 from Seg.Seg import CSeg
 
 LINE_TYPE = TypeVar('LINE_TYPE', CBi, "CSeg")

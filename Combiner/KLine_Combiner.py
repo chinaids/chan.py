@@ -3,7 +3,7 @@ from typing import Generic, Iterable, List, Optional, Self, TypeVar, Union, over
 from Common.cache import make_cache
 from Common.CEnum import FenxingType, KLineDir
 from Common.ChanException import CChanException, ErrCode
-from KLine.KLine_Unit import CKLineUnit
+from KLine.KLineUnit import CKLineUnit
 
 from .Combine_Item import CCombine_Item
 

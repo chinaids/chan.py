@@ -5,13 +5,13 @@ from typing import Dict, Iterable, List, Optional, Union
 
 from BuySellPoint.BS_Point import CBS_Point
 from ChanConfig import CChanConfig
-from Common.CEnum import AUTYPE, DataSrc, KlineType
+from Common.CEnum import AdjustmentType, DataSrc, KlineType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Common.func_util import check_kltype_order, kltype_lte_day
 from DataAPI.CommonStockAPI import CCommonStockApi
-from KLine.KLine_List import CKLine_List
-from KLine.KLine_Unit import CKLineUnit
+from KLine.KLineList import CKLine_List
+from KLine.KLineUnit import CKLineUnit
 
 
 def GetStockAPI(src):
@@ -44,7 +44,7 @@ class CChan:
         data_src: Union[DataSrc, str] = DataSrc.BAO_STOCK,
         lv_list=None,
         config=None,
-        autype: AUTYPE = AUTYPE.QFQ,
+        adjustment: AdjustmentType = AdjustmentType.QFQ,
     ):
         if lv_list is None:
             lv_list = [KlineType.K_DAY, KlineType.K_60M]
@@ -52,7 +52,7 @@ class CChan:
         self.code = code
         self.begin_time = str(begin_time) if isinstance(begin_time, datetime.date) else begin_time
         self.end_time = str(end_time) if isinstance(end_time, datetime.date) else end_time
-        self.autype = autype
+        self.adjustment = adjustment
         self.data_src = data_src
         self.lv_list: List[KlineType] = lv_list
 
@@ -60,10 +60,14 @@ class CChan:
             config = CChanConfig()
         self.conf = config
 
-        self.kl_misalign_cnt = 0
+        self.kl_misaligned_cnt = 0
         self.kl_inconsistent_detail = defaultdict(list)
 
         self.g_kl_iter = defaultdict(list)
+
+        self.kl_datas: Dict[KlineType, CKLine_List] = None
+        self.klu_cache: List[Optional[CKLineUnit]] = None
+        self.klu_last_t = None
 
         self.do_init()
 
@@ -78,22 +82,22 @@ class CChan:
         obj.code = self.code
         obj.begin_time = self.begin_time
         obj.end_time = self.end_time
-        obj.autype = self.autype
+        obj.adjustment = self.adjustment
         obj.data_src = self.data_src
         obj.lv_list = copy.deepcopy(self.lv_list, memo)
         obj.conf = copy.deepcopy(self.conf, memo)
-        obj.kl_misalign_cnt = self.kl_misalign_cnt
+        obj.kl_misaligned_cnt = self.kl_misaligned_cnt
         obj.kl_inconsistent_detail = copy.deepcopy(self.kl_inconsistent_detail, memo)
         obj.g_kl_iter = copy.deepcopy(self.g_kl_iter, memo)
-        if hasattr(self, 'klu_cache'):
+        if self.klu_cache is not None:
             obj.klu_cache = copy.deepcopy(self.klu_cache, memo)
-        if hasattr(self, 'klu_last_t'):
+        if self.klu_last_t is not None:
             obj.klu_last_t = copy.deepcopy(self.klu_last_t, memo)
         obj.kl_datas = {}
-        for kl_type, ckline in self.kl_datas.items():
-            obj.kl_datas[kl_type] = copy.deepcopy(ckline, memo)
-        for kl_type, ckline in self.kl_datas.items():
-            for klc in ckline:
+        for kl_type, kline in self.kl_datas.items():
+            obj.kl_datas[kl_type] = copy.deepcopy(kline, memo)
+        for kl_type, kline in self.kl_datas.items():
+            for klc in kline:
                 for klu in klc.lst:
                     assert id(klu) in memo
                     if klu.sup_kl:
@@ -102,7 +106,7 @@ class CChan:
         return obj
 
     def do_init(self):
-        self.kl_datas: Dict[KlineType, CKLine_List] = {}
+        self.kl_datas = {}
         for idx in range(len(self.lv_list)):
             self.kl_datas[self.lv_list[idx]] = CKLine_List(self.lv_list[idx], conf=self.conf)
 
@@ -116,11 +120,11 @@ class CChan:
         stockapi_instance = stockapi_cls(code=self.code, k_type=lv, begin_date=self.begin_time, end_date=self.end_time, autype=self.autype)
         return self.load_stock_data(stockapi_instance, lv)
 
-    def add_lv_iter(self, lv_idx, iter):
+    def add_lv_iter(self, lv_idx, iterator):
         if isinstance(lv_idx, int):
-            self.g_kl_iter[self.lv_list[lv_idx]].append(iter)
+            self.g_kl_iter[self.lv_list[lv_idx]].append(iterator)
         else:
-            self.g_kl_iter[lv_idx].append(iter)
+            self.g_kl_iter[lv_idx].append(iterator)
 
     def get_next_lv_klu(self, lv_idx):
         if isinstance(lv_idx, int):
@@ -149,9 +153,9 @@ class CChan:
     def trigger_load(self, inp):
         # 在已有pickle基础上继续计算新的
         # {type: [klu, ...]}
-        if not hasattr(self, 'klu_cache'):
-            self.klu_cache: List[Optional[CKLineUnit]] = [None for _ in self.lv_list]
-        if not hasattr(self, 'klu_last_t'):
+        if self.klu_cache is None:
+            self.klu_cache = [None for _ in self.lv_list]
+        if self.klu_last_t is None:
             self.klu_last_t = [CTime(1980, 1, 1, 0, 0) for _ in self.lv_list]
         for lv_idx, lv in enumerate(self.lv_list):
             if lv not in inp:
@@ -267,10 +271,10 @@ class CChan:
 
     def check_kl_align(self, kline_unit, lv_idx):
         if self.conf.kl_data_check and len(kline_unit.sub_kl_list) == 0:
-            self.kl_misalign_cnt += 1
+            self.kl_misaligned_cnt += 1
             if self.conf.print_warning:
                 print(f"[WARNING-{self.code}]当前{kline_unit.time}没在次级别{self.lv_list[lv_idx+1]}找到K线！！")
-            if self.kl_misalign_cnt >= self.conf.max_kl_misalgin_cnt:
+            if self.kl_misaligned_cnt >= self.conf.max_kl_misalgin_cnt:
                 raise CChanException(f"在次级别找不到K线条数超过{self.conf.max_kl_misalgin_cnt}！！", ErrCode.KL_DATA_NOT_ALIGN)
 
     def __getitem__(self, n) -> CKLine_List:

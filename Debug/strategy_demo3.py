@@ -5,7 +5,7 @@ from Chan import CChan
 from ChanConfig import CChanConfig
 from Common.CEnum import AUTYPE, DATA_FIELD, DataSrc, KlineType
 from DataAPI.BaoStockAPI import CBaoStock
-from KLine.KLine_Unit import CKLineUnit
+from KLine.KLineUnit import CKLineUnit
 
 
 def combine_60m_klu_form_15m(klu_15m_lst: List[CKLineUnit]) -> CKLineUnit:

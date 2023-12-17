@@ -2,7 +2,7 @@ from Combiner.KLine_Combiner import CKLine_Combiner
 from Common.CEnum import FenxingCheckMethod, FenxingType, KLineDir
 from Common.ChanException import CChanException, ErrCode
 from Common.func_util import has_overlap
-from KLine.KLine_Unit import CKLineUnit
+from KLine.KLineUnit import CKLineUnit
 
 
 # 合并后的K线

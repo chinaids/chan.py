@@ -3,7 +3,7 @@ from typing import Generic, List, Optional, Self, TypeVar
 from Bi.Bi import CBi
 from Common.CEnum import BiDirection, MACDAlgo, TrendLineScope
 from Common.ChanException import CChanException, ErrCode
-from KLine.KLine_Unit import CKLineUnit
+from KLine.KLineUnit import CKLineUnit
 from Math.TrendLine import CTrendLine
 
 from .EigenFX import CEigenFX

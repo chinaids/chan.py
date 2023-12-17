@@ -12,16 +12,17 @@ class KLine:
     high: float
     low: float
 
-    def v(self, is_close: bool, dir: BiDirection) -> float:
+    def v(self, is_close: bool, direction: BiDirection) -> float:
         if is_close:
             return self.close
-        return self.high if dir == BiDirection.UP else self.low
+        return self.high if direction == BiDirection.UP else self.low
 
 
 T_DEMARK_TYPE = Literal['setup', 'countdown']
 
 
 class TDemarkIndex(TypedDict):
+    # 德马克指标配置
     type: T_DEMARK_TYPE
     dir: BiDirection
     idx: int
@@ -101,7 +102,7 @@ class CDemarkSetup:
             else:
                 self.setup_finished = True
         if self.idx == CDemarkEngine.DEMARK_LEN and not self.setup_finished and self.countdown is None:
-            self.countdown = CDemarkCountdown(self.dir, self.kl_list[:-1], self.cal_TDST_peak())
+            self.countdown = CDemarkCountdown(self.dir, self.kl_list[:-1], self.cal_tdst_peak())
         if self.countdown is not None and self.countdown.update(kl):
             self.last_demark_index.add(self.dir, 'countdown', self.countdown.idx, self)
         return self.last_demark_index
@@ -110,7 +111,7 @@ class CDemarkSetup:
         self.idx += 1
         self.last_demark_index.add(self.dir, 'setup', self.idx, self)
 
-    def cal_TDST_peak(self) -> float:
+    def cal_tdst_peak(self) -> float:
         assert len(self.kl_list) == CDemarkEngine.SETUP_BIAS+CDemarkEngine.DEMARK_LEN
         arr = self.kl_list[CDemarkEngine.SETUP_BIAS:CDemarkEngine.SETUP_BIAS+CDemarkEngine.DEMARK_LEN]
         assert len(arr) == CDemarkEngine.DEMARK_LEN

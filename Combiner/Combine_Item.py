@@ -4,7 +4,7 @@ from Common.ChanException import CChanException, ErrCode
 class CCombine_Item:
     def __init__(self, item):
         from Bi.Bi import CBi
-        from KLine.KLine_Unit import CKLineUnit
+        from KLine.KLineUnit import CKLineUnit
         from Seg.Seg import CSeg
         if type(item) == CBi:
             self.time_begin = item.begin_klc.idx
