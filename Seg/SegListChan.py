@@ -1,5 +1,5 @@
 from Bi.BiList import CBiList
-from Common.CEnum import BI_DIR, SEG_TYPE
+from Common.CEnum import BiDirection, SegType
 
 from .EigenFX import CEigenFX
 from .SegConfig import CSegConfig
@@ -7,7 +7,7 @@ from .SegListComm import CSegListComm
 
 
 class CSegListChan(CSegListComm):
-    def __init__(self, seg_config=CSegConfig(), lv=SEG_TYPE.BI):
+    def __init__(self, seg_config=CSegConfig(), lv=SegType.BI):
         super(CSegListChan, self).__init__(seg_config=seg_config, lv=lv)
 
     def do_init(self):
@@ -29,27 +29,27 @@ class CSegListChan(CSegListComm):
         self.collect_left_seg(bi_lst)
 
     def cal_seg_sure(self, bi_lst: CBiList, begin_idx: int):
-        up_eigen = CEigenFX(BI_DIR.UP, lv=self.lv)  # 上升线段下降笔
-        down_eigen = CEigenFX(BI_DIR.DOWN, lv=self.lv)  # 下降线段上升笔
+        up_eigen = CEigenFX(BiDirection.UP, lv=self.lv)  # 上升线段下降笔
+        down_eigen = CEigenFX(BiDirection.DOWN, lv=self.lv)  # 下降线段上升笔
         last_seg_dir = None if len(self) == 0 else self[-1].dir
         for bi in bi_lst[begin_idx:]:
             fx_eigen = None
-            if bi.is_down() and last_seg_dir != BI_DIR.UP:
+            if bi.is_down() and last_seg_dir != BiDirection.UP:
                 if up_eigen.add(bi):
                     fx_eigen = up_eigen
-            elif bi.is_up() and last_seg_dir != BI_DIR.DOWN:
+            elif bi.is_up() and last_seg_dir != BiDirection.DOWN:
                 if down_eigen.add(bi):
                     fx_eigen = down_eigen
             if len(self) == 0:  # 尝试确定第一段方向，不要以谁先成为分形来决定，反例：US.EVRG
                 if up_eigen.ele[1] is not None and bi.is_down():
-                    last_seg_dir = BI_DIR.DOWN
+                    last_seg_dir = BiDirection.DOWN
                     down_eigen.clear()
                 elif down_eigen.ele[1] is not None and bi.is_up():
                     up_eigen.clear()
-                    last_seg_dir = BI_DIR.UP
-                if up_eigen.ele[1] is None and last_seg_dir == BI_DIR.DOWN and bi.dir == BI_DIR.DOWN:
+                    last_seg_dir = BiDirection.UP
+                if up_eigen.ele[1] is None and last_seg_dir == BiDirection.DOWN and bi.dir == BiDirection.DOWN:
                     last_seg_dir = None
-                elif down_eigen.ele[1] is None and last_seg_dir == BI_DIR.UP and bi.dir == BI_DIR.UP:
+                elif down_eigen.ele[1] is None and last_seg_dir == BiDirection.UP and bi.dir == BiDirection.UP:
                     last_seg_dir = None
 
             if fx_eigen:

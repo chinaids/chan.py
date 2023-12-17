@@ -7,10 +7,10 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 
 from Chan import CChan
-from Common.CEnum import BI_DIR, FX_TYPE, KL_TYPE, KLINE_DIR, TREND_TYPE
+from Common.CEnum import BiDirection, FenxingType, KlineType, KLineDir, TrendType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
-from Math.Demark import T_DEMARK_INDEX, CDemarkEngine
+from Math.Demark import TDemarkIndex, CDemarkEngine
 
 from .PlotMeta import CBi_meta, CChanPlotMeta, CZS_meta
 
@@ -39,7 +39,7 @@ def parse_single_lv_plot_config(plot_config: Union[str, dict, list]) -> Dict[str
         raise CChanException("plot_config only support list/str/dict", ErrCode.PLOT_ERR)
 
 
-def parse_plot_config(plot_config: Union[str, dict, list], lv_list: List[KL_TYPE]) -> Dict[KL_TYPE, Dict[str, bool]]:
+def parse_plot_config(plot_config: Union[str, dict, list], lv_list: List[KlineType]) -> Dict[KlineType, Dict[str, bool]]:
     """
     支持：
         - 传入字典
@@ -52,7 +52,7 @@ def parse_plot_config(plot_config: Union[str, dict, list], lv_list: List[KL_TYPE
     if isinstance(plot_config, dict):
         if all(isinstance(_key, str) for _key in plot_config.keys()):  # 单层字典
             return {lv: parse_single_lv_plot_config(plot_config) for lv in lv_list}
-        elif all(isinstance(_key, KL_TYPE) for _key in plot_config.keys()):  # key为KL_TYPE
+        elif all(isinstance(_key, KlineType) for _key in plot_config.keys()):  # key为KL_TYPE
             for lv in lv_list:
                 assert lv in plot_config
             return {lv: parse_single_lv_plot_config(plot_config[lv]) for lv in lv_list}
@@ -82,7 +82,7 @@ def cal_y_range(meta: CChanPlotMeta, ax):
     return (y_min, y_max)
 
 
-def create_figure(plot_macd: Dict[KL_TYPE, bool], figure_config, lv_lst: List[KL_TYPE]) -> Tuple[Figure, Dict[KL_TYPE, List[Axes]]]:
+def create_figure(plot_macd: Dict[KlineType, bool], figure_config, lv_lst: List[KlineType]) -> Tuple[Figure, Dict[KlineType, List[Axes]]]:
     """
     返回：
         - Figure
@@ -116,7 +116,7 @@ def create_figure(plot_macd: Dict[KL_TYPE, bool], figure_config, lv_lst: List[KL
     except Exception:  # 只有一个级别，且不需要画macd
         axes = [axes]
 
-    axes_dict: Dict[KL_TYPE, List[Axes]] = {}
+    axes_dict: Dict[KlineType, List[Axes]] = {}
     idx = 0
     for lv in lv_lst:
         if plot_macd[lv]:
@@ -164,7 +164,7 @@ class CPlotDriver:
         self.lv_lst = chan.lv_list[:len(plot_metas)]
 
         x_range = self.GetRealXrange(figure_config, plot_metas[0])
-        plot_macd: Dict[KL_TYPE, bool] = {kl_type: conf.get("plot_macd", False) for kl_type, conf in plot_config.items()}
+        plot_macd: Dict[KlineType, bool] = {kl_type: conf.get("plot_macd", False) for kl_type, conf in plot_config.items()}
         self.figure, axes = create_figure(plot_macd, figure_config, self.lv_lst)
 
         sseg_begin = 0
@@ -321,7 +321,7 @@ class CPlotDriver:
             ax.plot(_x, _y)
 
     def draw_klc(self, meta: CChanPlotMeta, ax: Axes, width=0.4, plot_single_kl=True):
-        color_type = {FX_TYPE.TOP: 'red', FX_TYPE.BOTTOM: 'blue', KLINE_DIR.UP: 'green', KLINE_DIR.DOWN: 'green'}
+        color_type = {FenxingType.TOP: 'red', FenxingType.BOTTOM: 'blue', KLineDir.UP: 'green', KLineDir.DOWN: 'green'}
         x_begin = ax.get_xlim()[0]
 
         for klc_meta in meta.klc_list:
@@ -443,7 +443,7 @@ class CPlotDriver:
                         f'{seg_meta.begin_y:.2f}',
                         fontsize=end_fontsize,
                         color=end_color,
-                        verticalalignment="top" if seg_meta.dir == BI_DIR.UP else "bottom",
+                        verticalalignment="top" if seg_meta.dir == BiDirection.UP else "bottom",
                         horizontalalignment='center')
                 ax.text(
                     seg_meta.end_x,
@@ -451,14 +451,14 @@ class CPlotDriver:
                     f'{seg_meta.end_y:.2f}',
                     fontsize=end_fontsize,
                     color=end_color,
-                    verticalalignment="top" if seg_meta.dir == BI_DIR.DOWN else "bottom",
+                    verticalalignment="top" if seg_meta.dir == BiDirection.DOWN else "bottom",
                     horizontalalignment='center')
 
     def draw_eigen(self, meta: CChanPlotMeta, ax: Axes, color_top="r", color_bottom="b", aplha=0.5, only_peak=False):
         x_begin = ax.get_xlim()[0]
 
         for eigenfx_meta in meta.eigenfx_lst:
-            color = color_top if eigenfx_meta.fx == FX_TYPE.TOP else color_bottom
+            color = color_top if eigenfx_meta.fx == FenxingType.TOP else color_bottom
             for idx, eigen_meta in enumerate(eigenfx_meta.ele):
                 if eigen_meta.begin_x+eigen_meta.w < x_begin:
                     continue
@@ -530,7 +530,7 @@ class CPlotDriver:
         ax.set_ylim(y_min, y_max)
 
     def draw_mean(self, meta: CChanPlotMeta, ax: Axes):
-        mean_lst = [klu.trend[TREND_TYPE.MEAN] for klu in meta.klu_iter()]
+        mean_lst = [klu.trend[TrendType.MEAN] for klu in meta.klu_iter()]
         Ts = list(mean_lst[0].keys())
         cmap = plt.cm.get_cmap('hsv', max([10, len(Ts)]))  # type: ignore
         for cmap_idx, T in enumerate(Ts):
@@ -539,8 +539,8 @@ class CPlotDriver:
         ax.legend()
 
     def draw_channel(self, meta: CChanPlotMeta, ax: Axes, T=None, top_color="r", bottom_color="b", linewidth=3, linestyle="solid"):
-        max_lst = [klu.trend[TREND_TYPE.MAX] for klu in meta.klu_iter()]
-        min_lst = [klu.trend[TREND_TYPE.MIN] for klu in meta.klu_iter()]
+        max_lst = [klu.trend[TrendType.MAX] for klu in meta.klu_iter()]
+        min_lst = [klu.trend[TrendType.MIN] for klu in meta.klu_iter()]
         config_T_lst = sorted(list(max_lst[0].keys()))
         if T is None:
             T = config_T_lst[-1]
@@ -691,7 +691,7 @@ class CPlotDriver:
                 horizontalalignment='center'
             )
 
-    def draw_demark_begin_line(self, ax, begin_line_color, plot_begin_set: set, linestyle: str, demark_idx: T_DEMARK_INDEX):
+    def draw_demark_begin_line(self, ax, begin_line_color, plot_begin_set: set, linestyle: str, demark_idx: TDemarkIndex):
         if begin_line_color is not None and demark_idx['series'].TDST_peak is not None and id(demark_idx['series']) not in plot_begin_set:
             if demark_idx['series'].countdown is not None:
                 end_idx = demark_idx['series'].countdown.kl_list[-1].idx
@@ -755,33 +755,33 @@ class CPlotDriver:
                 self.draw_demark_begin_line(ax, begin_line_color, plot_begin_set, begin_line_style, demark_idx)
                 txt_instance = ax.text(
                     klu.idx,
-                    klu.low-under_bias if demark_idx['dir'] == BI_DIR.DOWN else klu.high+upper_bias,
+                    klu.low-under_bias if demark_idx['dir'] == BiDirection.DOWN else klu.high + upper_bias,
                     str(demark_idx['idx']),
                     fontsize=fontsize,
                     color=setup_color,
-                    verticalalignment='top' if demark_idx['dir'] == BI_DIR.DOWN else 'bottom',
+                    verticalalignment='top' if demark_idx['dir'] == BiDirection.DOWN else 'bottom',
                     horizontalalignment='center'
                 )
-                if demark_idx['dir'] == BI_DIR.DOWN:
-                    under_bias += getTextBox(ax, txt_instance).height if demark_idx['dir'] == BI_DIR.DOWN else 0
+                if demark_idx['dir'] == BiDirection.DOWN:
+                    under_bias += getTextBox(ax, txt_instance).height if demark_idx['dir'] == BiDirection.DOWN else 0
                 else:
                     upper_bias += getTextBox(ax, txt_instance).height
             for demark_idx in klu.demark.get_countdown():
                 box_bias = 0.5*text_height if text_height is not None and demark_idx['idx'] == CDemarkEngine.MAX_COUNTDOWN else 0
                 txt_instance = ax.text(
                     klu.idx,
-                    klu.low-under_bias-box_bias if demark_idx['dir'] == BI_DIR.DOWN else klu.high+upper_bias+box_bias,
+                    klu.low-under_bias-box_bias if demark_idx['dir'] == BiDirection.DOWN else klu.high + upper_bias + box_bias,
                     str(demark_idx['idx']),
                     fontsize=fontsize,
                     color=countdown_color,
-                    verticalalignment='top' if demark_idx['dir'] == BI_DIR.DOWN else 'bottom',
+                    verticalalignment='top' if demark_idx['dir'] == BiDirection.DOWN else 'bottom',
                     horizontalalignment='center',
                 )
                 if text_height is None:
                     text_height = getTextBox(ax, txt_instance).height
                 if demark_idx['idx'] == CDemarkEngine.MAX_COUNTDOWN:
                     txt_instance.set_bbox(dict(facecolor=max_countdown_background, edgecolor=max_countdown_background, pad=0))
-                if demark_idx['dir'] == BI_DIR.DOWN:
+                if demark_idx['dir'] == BiDirection.DOWN:
                     under_bias += getTextBox(ax, txt_instance).height
                 else:
                     upper_bias += getTextBox(ax, txt_instance).height
@@ -806,7 +806,7 @@ def bi_text(bi_idx, ax: Axes, bi, end_fontsize, end_color):
             f'{bi.begin_y:.2f}',
             fontsize=end_fontsize,
             color=end_color,
-            verticalalignment="top" if bi.dir == BI_DIR.UP else "bottom",
+            verticalalignment="top" if bi.dir == BiDirection.UP else "bottom",
             horizontalalignment='center')
     ax.text(
         bi.end_x,
@@ -814,7 +814,7 @@ def bi_text(bi_idx, ax: Axes, bi, end_fontsize, end_color):
         f'{bi.end_y:.2f}',
         fontsize=end_fontsize,
         color=end_color,
-        verticalalignment="top" if bi.dir == BI_DIR.DOWN else "bottom",
+        verticalalignment="top" if bi.dir == BiDirection.DOWN else "bottom",
         horizontalalignment='center')
 
 

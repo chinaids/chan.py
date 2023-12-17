@@ -1,4 +1,4 @@
-from Common.CEnum import FX_CHECK_METHOD
+from Common.CEnum import FenxingCheckMethod
 from Common.ChanException import CChanException, ErrCode
 
 
@@ -15,13 +15,13 @@ class CBiConfig:
         self.bi_algo = bi_algo
         self.is_strict = is_strict
         if bi_fx_check == "strict":
-            self.bi_fx_check = FX_CHECK_METHOD.STRICT
+            self.bi_fx_check = FenxingCheckMethod.STRICT
         elif bi_fx_check == "loss":
-            self.bi_fx_check = FX_CHECK_METHOD.LOSS
+            self.bi_fx_check = FenxingCheckMethod.LOSS
         elif bi_fx_check == "half":
-            self.bi_fx_check = FX_CHECK_METHOD.HALF
+            self.bi_fx_check = FenxingCheckMethod.HALF
         elif bi_fx_check == 'totally':
-            self.bi_fx_check = FX_CHECK_METHOD.TOTALLY
+            self.bi_fx_check = FenxingCheckMethod.TOTALLY
         else:
             raise CChanException(f"unknown bi_fx_check={bi_fx_check}", ErrCode.PARA_ERROR)
 

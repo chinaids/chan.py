@@ -2,7 +2,7 @@ import copy
 from dataclasses import dataclass
 from math import sqrt
 
-from Common.CEnum import BI_DIR, TREND_LINE_SIDE
+from Common.CEnum import BiDirection, TrendLineScope
 
 
 @dataclass
@@ -24,14 +24,14 @@ class Line:
 
 
 class CTrendLine:
-    def __init__(self, lst, side=TREND_LINE_SIDE.OUTSIDE):
+    def __init__(self, lst, side=TrendLineScope.OUTSIDE):
         self.line = None
         self.side = side
         self.cal(lst)
 
     def cal(self, lst):
         bench = float('inf')
-        if self.side == TREND_LINE_SIDE.INSIDE:
+        if self.side == TrendLineScope.INSIDE:
             all_p = [Point(bi.get_begin_klu().idx, bi.get_begin_val()) for bi in lst[-1::-2]]
         else:
             all_p = [Point(bi.get_end_klu().idx, bi.get_end_val()) for bi in lst[-1::-2]]
@@ -48,9 +48,9 @@ class CTrendLine:
 
 
 def init_peak_slope(_dir, side):
-    if side == TREND_LINE_SIDE.INSIDE:
+    if side == TrendLineScope.INSIDE:
         return 0
-    elif _dir == BI_DIR.UP:
+    elif _dir == BiDirection.UP:
         return float("inf")
     else:
         return -float("inf")
@@ -62,14 +62,14 @@ def cal_tl(c_p, _dir, side):
     idx = 1
     for point_idx, p2 in enumerate(c_p[1:]):
         slope = p.cal_slope(p2)
-        if (_dir == BI_DIR.UP and slope < 0) or (_dir == BI_DIR.DOWN and slope > 0):
+        if (_dir == BiDirection.UP and slope < 0) or (_dir == BiDirection.DOWN and slope > 0):
             continue
-        if side == TREND_LINE_SIDE.INSIDE:
-            if (_dir == BI_DIR.UP and slope > peak_slope) or (_dir == BI_DIR.DOWN and slope < peak_slope):
+        if side == TrendLineScope.INSIDE:
+            if (_dir == BiDirection.UP and slope > peak_slope) or (_dir == BiDirection.DOWN and slope < peak_slope):
                 peak_slope = slope
                 idx = point_idx+1
         else:
-            if (_dir == BI_DIR.UP and slope < peak_slope) or (_dir == BI_DIR.DOWN and slope > peak_slope):
+            if (_dir == BiDirection.UP and slope < peak_slope) or (_dir == BiDirection.DOWN and slope > peak_slope):
                 peak_slope = slope
                 idx = point_idx+1
     return Line(p, peak_slope), idx

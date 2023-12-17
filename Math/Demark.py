@@ -2,43 +2,43 @@ import copy
 from dataclasses import dataclass
 from typing import List, Literal, Optional, TypedDict
 
-from Common.CEnum import BI_DIR
+from Common.CEnum import BiDirection
 
 
 @dataclass
-class C_KL:
+class KLine:
     idx: int
     close: float
     high: float
     low: float
 
-    def v(self, is_close: bool, _dir: BI_DIR) -> float:
+    def v(self, is_close: bool, dir: BiDirection) -> float:
         if is_close:
             return self.close
-        return self.high if _dir == BI_DIR.UP else self.low
+        return self.high if dir == BiDirection.UP else self.low
 
 
 T_DEMARK_TYPE = Literal['setup', 'countdown']
 
 
-class T_DEMARK_INDEX(TypedDict):
+class TDemarkIndex(TypedDict):
     type: T_DEMARK_TYPE
-    dir: BI_DIR
+    dir: BiDirection
     idx: int
     series: 'CDemarkSetup'
 
 
 class CDemarkIndex:
     def __init__(self):
-        self.data: List[T_DEMARK_INDEX] = []
+        self.data: List[TDemarkIndex] = []
 
-    def add(self, _dir: BI_DIR, _type: T_DEMARK_TYPE, idx: int, series: 'CDemarkSetup'):
+    def add(self, _dir: BiDirection, _type: T_DEMARK_TYPE, idx: int, series: 'CDemarkSetup'):
         self.data.append({"dir": _dir, "idx": idx, "type": _type, "series": series})
 
-    def get_setup(self) -> List[T_DEMARK_INDEX]:
+    def get_setup(self) -> List[TDemarkIndex]:
         return [info for info in self.data if info['type'] == 'setup']
 
-    def get_countdown(self) -> List[T_DEMARK_INDEX]:
+    def get_countdown(self) -> List[TDemarkIndex]:
         return [info for info in self.data if info['type'] == 'countdown']
 
     def update(self, demark_index: 'CDemarkIndex'):
@@ -46,14 +46,14 @@ class CDemarkIndex:
 
 
 class CDemarkCountdown:
-    def __init__(self, _dir: BI_DIR, kl_list: List[C_KL], TDST_peak: float):
+    def __init__(self, _dir: BiDirection, kl_list: List[KLine], TDST_peak: float):
         self.dir = _dir
-        self.kl_list: List[C_KL] = copy.deepcopy(kl_list)
+        self.kl_list: List[KLine] = copy.deepcopy(kl_list)
         self.idx = 0
         self.TDST_peak = TDST_peak
         self.finish = False
 
-    def update(self, kl: C_KL) -> bool:
+    def update(self, kl: KLine) -> bool:
         if self.finish:
             return False
         self.kl_list.append(kl)
@@ -62,22 +62,22 @@ class CDemarkCountdown:
         if self.idx == CDemarkEngine.MAX_COUNTDOWN:
             self.finish = True
             return False
-        if (self.dir == BI_DIR.DOWN and kl.high > self.TDST_peak) or (self.dir == BI_DIR.UP and kl.low < self.TDST_peak):
+        if (self.dir == BiDirection.DOWN and kl.high > self.TDST_peak) or (self.dir == BiDirection.UP and kl.low < self.TDST_peak):
             self.finish = True
             return False
-        if self.dir == BI_DIR.DOWN and self.kl_list[-1].close < self.kl_list[-1 - CDemarkEngine.COUNTDOWN_BIAS].v(CDemarkEngine.COUNTDOWN_CMP2CLOSE, self.dir):
+        if self.dir == BiDirection.DOWN and self.kl_list[-1].close < self.kl_list[-1 - CDemarkEngine.COUNTDOWN_BIAS].v(CDemarkEngine.COUNTDOWN_CMP2CLOSE, self.dir):
             self.idx += 1
             return True
-        if self.dir == BI_DIR.UP and self.kl_list[-1].close > self.kl_list[-1 - CDemarkEngine.COUNTDOWN_BIAS].v(CDemarkEngine.COUNTDOWN_CMP2CLOSE, self.dir):
+        if self.dir == BiDirection.UP and self.kl_list[-1].close > self.kl_list[-1 - CDemarkEngine.COUNTDOWN_BIAS].v(CDemarkEngine.COUNTDOWN_CMP2CLOSE, self.dir):
             self.idx += 1
             return True
         return False
 
 
 class CDemarkSetup:
-    def __init__(self, _dir: BI_DIR, kl_list: List[C_KL], pre_kl: C_KL):
+    def __init__(self, _dir: BiDirection, kl_list: List[KLine], pre_kl: KLine):
         self.dir = _dir
-        self.kl_list: List[C_KL] = copy.deepcopy(kl_list)
+        self.kl_list: List[KLine] = copy.deepcopy(kl_list)
         self.pre_kl = pre_kl  # 跳空时用
         assert len(self.kl_list) == CDemarkEngine.SETUP_BIAS
         self.countdown: Optional[CDemarkCountdown] = None
@@ -87,11 +87,11 @@ class CDemarkSetup:
 
         self.last_demark_index = CDemarkIndex()  # 缓存用
 
-    def update(self, kl: C_KL) -> CDemarkIndex:
+    def update(self, kl: KLine) -> CDemarkIndex:
         self.last_demark_index = CDemarkIndex()
         if not self.setup_finished:
             self.kl_list.append(kl)
-            if self.dir == BI_DIR.DOWN:
+            if self.dir == BiDirection.DOWN:
                 if self.kl_list[-1].close < self.kl_list[-1-CDemarkEngine.SETUP_BIAS].v(CDemarkEngine.SETUP_CMP2CLOSE, self.dir):
                     self.add_setup()
                 else:
@@ -114,7 +114,7 @@ class CDemarkSetup:
         assert len(self.kl_list) == CDemarkEngine.SETUP_BIAS+CDemarkEngine.DEMARK_LEN
         arr = self.kl_list[CDemarkEngine.SETUP_BIAS:CDemarkEngine.SETUP_BIAS+CDemarkEngine.DEMARK_LEN]
         assert len(arr) == CDemarkEngine.DEMARK_LEN
-        if self.dir == BI_DIR.DOWN:
+        if self.dir == BiDirection.DOWN:
             res = max(kl.high for kl in arr)
             if CDemarkEngine.TIAOKONG_ST and arr[0].high < self.pre_kl.close:
                 res = max(res, self.pre_kl.close)
@@ -153,25 +153,25 @@ class CDemarkEngine:
         CDemarkEngine.SETUP_CMP2CLOSE = setup_cmp2close
         CDemarkEngine.COUNTDOWN_CMP2CLOSE = countdown_cmp2close
 
-        self.kl_lst: List[C_KL] = []
+        self.kl_lst: List[KLine] = []
         self.series: List[CDemarkSetup] = []
 
     def update(self, idx: int, close: float, high: float, low: float) -> CDemarkIndex:
-        self.kl_lst.append(C_KL(idx, close, high, low))
+        self.kl_lst.append(KLine(idx, close, high, low))
         if len(self.kl_lst) <= CDemarkEngine.SETUP_BIAS+1:
             return CDemarkIndex()
 
         if self.kl_lst[-1].close < self.kl_lst[-1-self.SETUP_BIAS].close:
-            if not any(series.dir == BI_DIR.DOWN and not series.setup_finished for series in self.series):
-                self.series.append(CDemarkSetup(BI_DIR.DOWN, self.kl_lst[-CDemarkEngine.SETUP_BIAS-1:-1], self.kl_lst[-CDemarkEngine.SETUP_BIAS-2]))
+            if not any(series.dir == BiDirection.DOWN and not series.setup_finished for series in self.series):
+                self.series.append(CDemarkSetup(BiDirection.DOWN, self.kl_lst[-CDemarkEngine.SETUP_BIAS - 1:-1], self.kl_lst[-CDemarkEngine.SETUP_BIAS - 2]))
             for series in self.series:
-                if series.dir == BI_DIR.UP and series.countdown is None and not series.setup_finished:
+                if series.dir == BiDirection.UP and series.countdown is None and not series.setup_finished:
                     series.setup_finished = True
         elif self.kl_lst[-1].close > self.kl_lst[-1-self.SETUP_BIAS].close:
-            if not any(series.dir == BI_DIR.UP and not series.setup_finished for series in self.series):
-                self.series.append(CDemarkSetup(BI_DIR.UP, self.kl_lst[-CDemarkEngine.SETUP_BIAS-1:-1], self.kl_lst[-CDemarkEngine.SETUP_BIAS-2]))
+            if not any(series.dir == BiDirection.UP and not series.setup_finished for series in self.series):
+                self.series.append(CDemarkSetup(BiDirection.UP, self.kl_lst[-CDemarkEngine.SETUP_BIAS - 1:-1], self.kl_lst[-CDemarkEngine.SETUP_BIAS - 2]))
             for series in self.series:
-                if series.dir == BI_DIR.DOWN and series.countdown is None and not series.setup_finished:
+                if series.dir == BiDirection.DOWN and series.countdown is None and not series.setup_finished:
                     series.setup_finished = True
 
         self.clear()

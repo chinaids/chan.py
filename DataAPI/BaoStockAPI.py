@@ -1,9 +1,9 @@
 import baostock as bs
 
-from Common.CEnum import AUTYPE, DATA_FIELD, KL_TYPE
+from Common.CEnum import AUTYPE, DATA_FIELD, KlineType
 from Common.CTime import CTime
 from Common.func_util import kltype_lt_day, str2float
-from KLine.KLine_Unit import CKLine_Unit
+from KLine.KLine_Unit import CKLineUnit
 
 from .CommonStockAPI import CCommonStockApi
 
@@ -57,7 +57,7 @@ def GetColumnNameFromFieldList(fileds: str):
 class CBaoStock(CCommonStockApi):
     is_connect = None
 
-    def __init__(self, code, k_type=KL_TYPE.K_DAY, begin_date=None, end_date=None, autype=AUTYPE.QFQ):
+    def __init__(self, code, k_type=KlineType.K_DAY, begin_date=None, end_date=None, autype=AUTYPE.QFQ):
         super(CBaoStock, self).__init__(code, k_type, begin_date, end_date, autype)
 
     def get_kl_data(self):
@@ -80,7 +80,7 @@ class CBaoStock(CCommonStockApi):
         if rs.error_code != '0':
             raise Exception(rs.error_msg)
         while rs.error_code == '0' and rs.next():
-            yield CKLine_Unit(create_item_dict(rs.get_row_data(), GetColumnNameFromFieldList(fields)))
+            yield CKLineUnit(create_item_dict(rs.get_row_data(), GetColumnNameFromFieldList(fields)))
 
     def SetBasciInfo(self):
         rs = bs.query_stock_basic(code=self.code)
@@ -103,12 +103,12 @@ class CBaoStock(CCommonStockApi):
 
     def __convert_type(self):
         _dict = {
-            KL_TYPE.K_DAY: 'd',
-            KL_TYPE.K_WEEK: 'w',
-            KL_TYPE.K_MON: 'm',
-            KL_TYPE.K_5M: '5',
-            KL_TYPE.K_15M: '15',
-            KL_TYPE.K_30M: '30',
-            KL_TYPE.K_60M: '60',
+            KlineType.K_DAY: 'd',
+            KlineType.K_WEEK: 'w',
+            KlineType.K_MON: 'm',
+            KlineType.K_5M: '5',
+            KlineType.K_15M: '15',
+            KlineType.K_30M: '30',
+            KlineType.K_60M: '60',
         }
         return _dict[self.k_type]

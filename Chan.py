@@ -5,26 +5,26 @@ from typing import Dict, Iterable, List, Optional, Union
 
 from BuySellPoint.BS_Point import CBS_Point
 from ChanConfig import CChanConfig
-from Common.CEnum import AUTYPE, DATA_SRC, KL_TYPE
+from Common.CEnum import AUTYPE, DataSrc, KlineType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Common.func_util import check_kltype_order, kltype_lte_day
 from DataAPI.CommonStockAPI import CCommonStockApi
 from KLine.KLine_List import CKLine_List
-from KLine.KLine_Unit import CKLine_Unit
+from KLine.KLine_Unit import CKLineUnit
 
 
 def GetStockAPI(src):
     _dict = {}
-    if src == DATA_SRC.BAO_STOCK:
+    if src == DataSrc.BAO_STOCK:
         from DataAPI.BaoStockAPI import CBaoStock
-        _dict[DATA_SRC.BAO_STOCK] = CBaoStock
-    elif src == DATA_SRC.CCXT:
+        _dict[DataSrc.BAO_STOCK] = CBaoStock
+    elif src == DataSrc.CCXT:
         from DataAPI.ccxt import CCXT
-        _dict[DATA_SRC.CCXT] = CCXT
-    elif src == DATA_SRC.CSV:
+        _dict[DataSrc.CCXT] = CCXT
+    elif src == DataSrc.CSV:
         from DataAPI.csvAPI import CSV_API
-        _dict[DATA_SRC.CSV] = CSV_API
+        _dict[DataSrc.CSV] = CSV_API
     if src in _dict:
         return _dict[src]
     if src.find("custom:") < 0:
@@ -41,20 +41,20 @@ class CChan:
         code,
         begin_time=None,
         end_time=None,
-        data_src: Union[DATA_SRC, str] = DATA_SRC.BAO_STOCK,
+        data_src: Union[DataSrc, str] = DataSrc.BAO_STOCK,
         lv_list=None,
         config=None,
         autype: AUTYPE = AUTYPE.QFQ,
     ):
         if lv_list is None:
-            lv_list = [KL_TYPE.K_DAY, KL_TYPE.K_60M]
+            lv_list = [KlineType.K_DAY, KlineType.K_60M]
         check_kltype_order(lv_list)  # lv_list顺序从高到低
         self.code = code
         self.begin_time = str(begin_time) if isinstance(begin_time, datetime.date) else begin_time
         self.end_time = str(end_time) if isinstance(end_time, datetime.date) else end_time
         self.autype = autype
         self.data_src = data_src
-        self.lv_list: List[KL_TYPE] = lv_list
+        self.lv_list: List[KlineType] = lv_list
 
         if config is None:
             config = CChanConfig()
@@ -102,11 +102,11 @@ class CChan:
         return obj
 
     def do_init(self):
-        self.kl_datas: Dict[KL_TYPE, CKLine_List] = {}
+        self.kl_datas: Dict[KlineType, CKLine_List] = {}
         for idx in range(len(self.lv_list)):
             self.kl_datas[self.lv_list[idx]] = CKLine_List(self.lv_list[idx], conf=self.conf)
 
-    def load_stock_data(self, stockapi_instance: CCommonStockApi, lv) -> Iterable[CKLine_Unit]:
+    def load_stock_data(self, stockapi_instance: CCommonStockApi, lv) -> Iterable[CKLineUnit]:
         for KLU_IDX, klu in enumerate(stockapi_instance.get_kl_data()):
             klu.set_idx(KLU_IDX)
             klu.kl_type = lv
@@ -150,7 +150,7 @@ class CChan:
         # 在已有pickle基础上继续计算新的
         # {type: [klu, ...]}
         if not hasattr(self, 'klu_cache'):
-            self.klu_cache: List[Optional[CKLine_Unit]] = [None for _ in self.lv_list]
+            self.klu_cache: List[Optional[CKLineUnit]] = [None for _ in self.lv_list]
         if not hasattr(self, 'klu_last_t'):
             self.klu_last_t = [CTime(1980, 1, 1, 0, 0) for _ in self.lv_list]
         for lv_idx, lv in enumerate(self.lv_list):
@@ -187,7 +187,7 @@ class CChan:
             stockapi_cls.do_init()
             for lv_idx, klu_iter in enumerate(self.init_lv_klu_iter(stockapi_cls)):
                 self.add_lv_iter(lv_idx, klu_iter)
-            self.klu_cache: List[Optional[CKLine_Unit]] = [None for _ in self.lv_list]
+            self.klu_cache: List[Optional[CKLineUnit]] = [None for _ in self.lv_list]
             self.klu_last_t = [CTime(1980, 1, 1, 0, 0) for _ in self.lv_list]
 
             yield from self.load_iterator(lv_idx=0, parent_klu=None, step=step)  # 计算入口
@@ -207,7 +207,7 @@ class CChan:
         parent_klu.add_children(kline_unit)
         kline_unit.set_parent(parent_klu)
 
-    def add_new_kl(self, cur_lv: KL_TYPE, kline_unit):
+    def add_new_kl(self, cur_lv: KlineType, kline_unit):
         try:
             self.kl_datas[cur_lv].add_single_klu(kline_unit)
         except Exception:
@@ -215,7 +215,7 @@ class CChan:
                 print(f"[ERROR-{self.code}]在计算{kline_unit.time}K线时发生错误!")
             raise
 
-    def try_set_klu_idx(self, lv_idx: int, kline_unit: CKLine_Unit):
+    def try_set_klu_idx(self, lv_idx: int, kline_unit: CKLineUnit):
         if kline_unit.idx >= 0:
             return
         if len(self[lv_idx]) == 0:
@@ -274,7 +274,7 @@ class CChan:
                 raise CChanException(f"在次级别找不到K线条数超过{self.conf.max_kl_misalgin_cnt}！！", ErrCode.KL_DATA_NOT_ALIGN)
 
     def __getitem__(self, n) -> CKLine_List:
-        if isinstance(n, KL_TYPE):
+        if isinstance(n, KlineType):
             return self.kl_datas[n]
         elif isinstance(n, int):
             return self.kl_datas[self.lv_list[n]]

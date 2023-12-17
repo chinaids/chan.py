@@ -1,7 +1,8 @@
 import copy
 from typing import Dict, Optional
 
-from Common.CEnum import DATA_FIELD, TRADE_INFO_LST, TREND_TYPE
+from KLine.KLine import CKLine
+from Common.CEnum import DATA_FIELD, TRADE_INFO_LST, TrendType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Math.BOLL import BOLL_Metric, BollModel
@@ -14,15 +15,18 @@ from Math.TrendModel import CTrendModel
 from .TradeInfo import CTradeInfo
 
 
-class CKLine_Unit:
+class CKLineUnit:
     def __init__(self, kl_dict, autofix=False):
         # _time, _close, _open, _high, _low, _extra_info={}
+        self.__idx = -1
         self.kl_type = None
         self.time: CTime = kl_dict[DATA_FIELD.FIELD_TIME]
         self.close = kl_dict[DATA_FIELD.FIELD_CLOSE]
         self.open = kl_dict[DATA_FIELD.FIELD_OPEN]
         self.high = kl_dict[DATA_FIELD.FIELD_HIGH]
         self.low = kl_dict[DATA_FIELD.FIELD_LOW]
+        self.volume = kl_dict[DATA_FIELD.FIELD_VOLUME] if DATA_FIELD.FIELD_VOLUME in kl_dict else None
+        self.turnover = kl_dict[DATA_FIELD.FIELD_TURNOVER] if DATA_FIELD.FIELD_TURNOVER in kl_dict else None
 
         self.check(autofix)
 
@@ -31,18 +35,17 @@ class CKLine_Unit:
         self.demark: CDemarkIndex = CDemarkIndex()
 
         self.sub_kl_list = []  # 次级别KLU列表
-        self.sup_kl: Optional[CKLine_Unit] = None  # 指向更高级别KLU
+        self.sup_kl: Optional[CKLineUnit] = None  # 指向更高级别KLU
 
-        from KLine.KLine import CKLine
         self.__klc: Optional[CKLine] = None  # 指向KLine
 
         # self.macd: Optional[CMACD_item] = None
         # self.boll: Optional[BOLL_Metric] = None
-        self.trend: Dict[TREND_TYPE, Dict[int, float]] = {}  # int -> float
+        self.trend: Dict[TrendType, Dict[int, float]] = {}  # int -> float
 
         self.limit_flag = 0  # 0:普通 -1:跌停，1:涨停
 
-        self.set_idx(-1)
+        # self.set_idx(-1)
 
     def __deepcopy__(self, memo):
         _dict = {
@@ -55,12 +58,12 @@ class CKLine_Unit:
         for metric in TRADE_INFO_LST:
             if metric in self.trade_info.metric:
                 _dict[metric] = self.trade_info.metric[metric]
-        obj = CKLine_Unit(_dict)
+        obj = CKLineUnit(_dict)
         obj.demark = copy.deepcopy(self.demark, memo)
         obj.trend = copy.deepcopy(self.trend, memo)
         obj.limit_flag = self.limit_flag
-        obj.macd = copy.deepcopy(self.macd, memo)
-        obj.boll = copy.deepcopy(self.boll, memo)
+        # obj.macd = copy.deepcopy(self.macd, memo)
+        # obj.boll = copy.deepcopy(self.boll, memo)
         if hasattr(self, "rsi"):
             obj.rsi = copy.deepcopy(self.rsi, memo)
         if hasattr(self, "kdj"):
@@ -102,7 +105,7 @@ class CKLine_Unit:
     def add_children(self, child):
         self.sub_kl_list.append(child)
 
-    def set_parent(self, parent: 'CKLine_Unit'):
+    def set_parent(self, parent: 'CKLineUnit'):
         self.sup_kl = parent
 
     def get_children(self):

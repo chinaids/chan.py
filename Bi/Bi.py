@@ -1,19 +1,22 @@
 from typing import List, Optional
 
 from Common.cache import make_cache
-from Common.CEnum import BI_DIR, BI_TYPE, DATA_FIELD, FX_TYPE, MACD_ALGO
+from Common.CEnum import BiDirection, BiType, DATA_FIELD, FenxingType, MACDAlgo
 from Common.ChanException import CChanException, ErrCode
 from KLine.KLine import CKLine
-from KLine.KLine_Unit import CKLine_Unit
+from KLine.KLine_Unit import CKLineUnit
+
+from Seg.Seg import CSeg
+from BuySellPoint.BS_Point import CBS_Point
 
 
 class CBi:
     def __init__(self, begin_klc: CKLine, end_klc: CKLine, idx: int, is_sure: bool):
-        # self.__begin_klc = begin_klc
-        # self.__end_klc = end_klc
+        self.__begin_klc = None  # begin_klc
+        self.__end_klc = None  # end_klc
         self.__dir = None
         self.__idx = idx
-        self.__type = BI_TYPE.STRICT
+        self.__type = BiType.STRICT
 
         self.set(begin_klc, end_klc)
 
@@ -23,44 +26,53 @@ class CBi:
         self.__klc_lst: List[CKLine] = []
         self.__seg_idx: Optional[int] = None
 
-        from Seg.Seg import CSeg
         self.parent_seg: Optional[CSeg[CBi]] = None  # 在哪个线段里面
 
-        from BuySellPoint.BS_Point import CBS_Point
         self.bsp: Optional[CBS_Point] = None  # 尾部是不是买卖点
 
         self.next: Optional[CBi] = None
         self.pre: Optional[CBi] = None
 
+        self._memorize_cache = {}
+
     def clean_cache(self):
-        self._memoize_cache = {}
+        self._memorize_cache = {}
 
     @property
-    def begin_klc(self): return self.__begin_klc
+    def begin_klc(self):
+        return self.__begin_klc
 
     @property
-    def end_klc(self): return self.__end_klc
+    def end_klc(self):
+        return self.__end_klc
 
     @property
-    def dir(self): return self.__dir
+    def dir(self):
+        return self.__dir
 
     @property
-    def idx(self): return self.__idx
+    def idx(self):
+        return self.__idx
 
     @property
-    def type(self): return self.__type
+    def type(self):
+        return self.__type
 
     @property
-    def is_sure(self): return self.__is_sure
+    def is_sure(self):
+        return self.__is_sure
 
     @property
-    def sure_end(self): return self.__sure_end
+    def sure_end(self):
+        return self.__sure_end
 
     @property
-    def klc_lst(self): return self.__klc_lst
+    def klc_lst(self):
+        return self.__klc_lst
 
     @property
-    def seg_idx(self): return self.__seg_idx
+    def seg_idx(self):
+        return self.__seg_idx
 
     def set_seg_idx(self, idx):
         self.__seg_idx = idx
@@ -69,21 +81,20 @@ class CBi:
         return f"{self.dir}|{self.begin_klc} ~ {self.end_klc}"
 
     def check(self):
-        try:
-            if self.is_down():
-                assert self.begin_klc.high > self.end_klc.low
-            else:
-                assert self.begin_klc.low < self.end_klc.high
-        except Exception as e:
+        if self.is_down():
+            err = self.begin_klc.high > self.end_klc.low
+        else:
+            err = self.begin_klc.low < self.end_klc.high
+        if err:
             raise CChanException(f"{self.idx}:{self.begin_klc[0].time}~{self.end_klc[-1].time}笔的方向和收尾位置不一致!", ErrCode.BI_ERR) from e
 
     def set(self, begin_klc: CKLine, end_klc: CKLine):
         self.__begin_klc: CKLine = begin_klc
         self.__end_klc: CKLine = end_klc
-        if begin_klc.fx == FX_TYPE.BOTTOM:
-            self.__dir = BI_DIR.UP
-        elif begin_klc.fx == FX_TYPE.TOP:
-            self.__dir = BI_DIR.DOWN
+        if begin_klc.fx == FenxingType.BOTTOM:
+            self.__dir = BiDirection.UP
+        elif begin_klc.fx == FenxingType.TOP:
+            self.__dir = BiDirection.DOWN
         else:
             raise CChanException("ERROR DIRECTION when creating bi", ErrCode.BI_ERR)
         self.check()
@@ -98,14 +109,14 @@ class CBi:
         return self.end_klc.high if self.is_up() else self.end_klc.low
 
     @make_cache
-    def get_begin_klu(self) -> CKLine_Unit:
+    def get_begin_klu(self) -> CKLineUnit:
         if self.is_up():
             return self.begin_klc.get_peak_klu(is_high=False)
         else:
             return self.begin_klc.get_peak_klu(is_high=True)
 
     @make_cache
-    def get_end_klu(self) -> CKLine_Unit:
+    def get_end_klu(self) -> CKLineUnit:
         if self.is_up():
             return self.end_klc.get_peak_klu(is_high=True)
         else:
@@ -139,11 +150,11 @@ class CBi:
 
     @make_cache
     def is_down(self):
-        return self.dir == BI_DIR.DOWN
+        return self.dir == BiDirection.DOWN
 
     @make_cache
     def is_up(self):
-        return self.dir == BI_DIR.UP
+        return self.dir == BiDirection.UP
 
     def update_virtual_end(self, new_klc: CKLine):
         self.__sure_end = self.end_klc
@@ -167,29 +178,29 @@ class CBi:
         self.clean_cache()
 
     def cal_macd_metric(self, macd_algo, is_reverse):
-        if macd_algo == MACD_ALGO.AREA:
+        if macd_algo == MACDAlgo.AREA:
             return self.Cal_MACD_half(is_reverse)
-        elif macd_algo == MACD_ALGO.PEAK:
+        elif macd_algo == MACDAlgo.PEAK:
             return self.Cal_MACD_peak()
-        elif macd_algo == MACD_ALGO.FULL_AREA:
+        elif macd_algo == MACDAlgo.FULL_AREA:
             return self.Cal_MACD_area()
-        elif macd_algo == MACD_ALGO.DIFF:
+        elif macd_algo == MACDAlgo.DIFF:
             return self.Cal_MACD_diff()
-        elif macd_algo == MACD_ALGO.SLOPE:
+        elif macd_algo == MACDAlgo.SLOPE:
             return self.Cal_MACD_slope()
-        elif macd_algo == MACD_ALGO.AMP:
+        elif macd_algo == MACDAlgo.AMP:
             return self.Cal_MACD_amp()
-        elif macd_algo == MACD_ALGO.AMOUNT:
+        elif macd_algo == MACDAlgo.AMOUNT:
             return self.Cal_MACD_trade_metric(DATA_FIELD.FIELD_TURNOVER, cal_avg=False)
-        elif macd_algo == MACD_ALGO.VOLUMN:
+        elif macd_algo == MACDAlgo.VOLUME:
             return self.Cal_MACD_trade_metric(DATA_FIELD.FIELD_VOLUME, cal_avg=False)
-        elif macd_algo == MACD_ALGO.VOLUMN_AVG:
+        elif macd_algo == MACDAlgo.VOLUME_AVG:
             return self.Cal_MACD_trade_metric(DATA_FIELD.FIELD_VOLUME, cal_avg=True)
-        elif macd_algo == MACD_ALGO.AMOUNT_AVG:
+        elif macd_algo == MACDAlgo.AMOUNT_AVG:
             return self.Cal_MACD_trade_metric(DATA_FIELD.FIELD_TURNOVER, cal_avg=True)
-        elif macd_algo == MACD_ALGO.TURNRATE_AVG:
+        elif macd_algo == MACDAlgo.TURNRATE_AVG:
             return self.Cal_MACD_trade_metric(DATA_FIELD.FIELD_TURNRATE, cal_avg=True)
-        elif macd_algo == MACD_ALGO.RSI:
+        elif macd_algo == MACDAlgo.RSI:
             return self.Cal_Rsi()
         else:
             raise CChanException(f"unsupport macd_algo={macd_algo}, should be one of area/full_area/peak/diff/slope/amp", ErrCode.PARA_ERROR)

@@ -5,7 +5,7 @@ from Bi.Bi import CBi
 from Bi.BiList import CBiList
 from BuySellPoint.BSPointList import CBSPointList
 from ChanConfig import CChanConfig
-from Common.CEnum import KLINE_DIR, SEG_TYPE
+from Common.CEnum import KLineDir, SegType
 from Common.ChanException import CChanException, ErrCode
 from Seg.Seg import CSeg
 from Seg.SegConfig import CSegConfig
@@ -13,7 +13,7 @@ from Seg.SegListComm import CSegListComm
 from ZS.ZSList import CZSList
 
 from .KLine import CKLine
-from .KLine_Unit import CKLine_Unit
+from .KLine_Unit import CKLineUnit
 
 
 def get_seglist_instance(seg_config: CSegConfig, lv) -> CSegListComm:
@@ -38,8 +38,8 @@ class CKLine_List:
         self.config = conf
         self.lst: List[CKLine] = []  # K线列表，可递归  元素KLine类型
         self.bi_list = CBiList(bi_conf=conf.bi_conf)
-        self.seg_list: CSegListComm[CBi] = get_seglist_instance(seg_config=conf.seg_conf, lv=SEG_TYPE.BI)
-        self.segseg_list: CSegListComm[CSeg[CBi]] = get_seglist_instance(seg_config=conf.seg_conf, lv=SEG_TYPE.SEG)
+        self.seg_list: CSegListComm[CBi] = get_seglist_instance(seg_config=conf.seg_conf, lv=SegType.BI)
+        self.segseg_list: CSegListComm[CSeg[CBi]] = get_seglist_instance(seg_config=conf.seg_conf, lv=SegType.SEG)
 
         self.zs_list = CZSList(zs_config=conf.zs_conf)
         self.segzs_list = CZSList(zs_config=conf.zs_conf)
@@ -115,13 +115,13 @@ class CKLine_List:
     def need_cal_step_by_step(self):
         return self.config.triger_step
 
-    def add_single_klu(self, klu: CKLine_Unit):
+    def add_single_klu(self, klu: CKLineUnit):
         klu.set_metric(self.metric_model_lst)
         if len(self.lst) == 0:
             self.lst.append(CKLine(klu, idx=0))
         else:
             _dir = self.lst[-1].try_add(klu)
-            if _dir != KLINE_DIR.COMBINE:  # 不需要合并K线
+            if _dir != KLineDir.COMBINE:  # 不需要合并K线
                 self.lst.append(CKLine(klu, idx=len(self.lst), _dir=_dir))
                 if len(self.lst) >= 3:
                     self.lst[-2].update_fx(self.lst[-3], self.lst[-1])

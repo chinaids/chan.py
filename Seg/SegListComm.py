@@ -3,7 +3,7 @@ from typing import Generic, List, TypeVar, Union, overload
 
 from Bi.Bi import CBi
 from Bi.BiList import CBiList
-from Common.CEnum import BI_DIR, LEFT_SEG_METHOD, SEG_TYPE
+from Common.CEnum import BiDirection, LeftSegMethod, SegType
 from Common.ChanException import CChanException, ErrCode
 
 from .Seg import CSeg
@@ -13,7 +13,7 @@ SUB_LINE_TYPE = TypeVar('SUB_LINE_TYPE', CBi, "CSeg")
 
 
 class CSegListComm(Generic[SUB_LINE_TYPE]):
-    def __init__(self, seg_config=CSegConfig(), lv=SEG_TYPE.BI):
+    def __init__(self, seg_config=CSegConfig(), lv=SegType.BI):
         self.lst: List[CSeg[SUB_LINE_TYPE]] = []
         self.lv = lv
         self.do_init()
@@ -52,20 +52,20 @@ class CSegListComm(Generic[SUB_LINE_TYPE]):
     def collect_first_seg(self, bi_lst: CBiList):
         if len(bi_lst) < 3:
             return
-        if self.config.left_method == LEFT_SEG_METHOD.PEAK:
+        if self.config.left_method == LeftSegMethod.PEAK:
             _high = max(bi._high() for bi in bi_lst)
             _low = min(bi._low() for bi in bi_lst)
             if abs(_high-bi_lst[0].get_begin_val()) >= abs(_low-bi_lst[0].get_begin_val()):
                 peak_bi = FindPeakBi(bi_lst, is_high=True)
                 assert peak_bi is not None
-                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BI_DIR.UP, split_first_seg=False, reason="0seg_find_high")
+                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BiDirection.UP, split_first_seg=False, reason="0seg_find_high")
             else:
                 peak_bi = FindPeakBi(bi_lst, is_high=False)
                 assert peak_bi is not None
-                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BI_DIR.DOWN, split_first_seg=False, reason="0seg_find_low")
+                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BiDirection.DOWN, split_first_seg=False, reason="0seg_find_low")
             self.collect_left_as_seg(bi_lst)
-        elif self.config.left_method == LEFT_SEG_METHOD.ALL:
-            _dir = BI_DIR.UP if bi_lst[-1].get_end_val() >= bi_lst[0].get_begin_val() else BI_DIR.DOWN
+        elif self.config.left_method == LeftSegMethod.ALL:
+            _dir = BiDirection.UP if bi_lst[-1].get_end_val() >= bi_lst[0].get_begin_val() else BiDirection.DOWN
             self.add_new_seg(bi_lst, bi_lst[-1].idx, is_sure=False, seg_dir=_dir, split_first_seg=False, reason="0seg_collect_all")
         else:
             raise CChanException(f"unknown seg left_method = {self.config.left_method}", ErrCode.PARA_ERROR)
@@ -74,11 +74,11 @@ class CSegListComm(Generic[SUB_LINE_TYPE]):
         if last_seg_end_bi.is_down():
             peak_bi = FindPeakBi(bi_lst[last_seg_end_bi.idx+3:], is_high=True)
             if peak_bi and peak_bi.idx - last_seg_end_bi.idx >= 3:
-                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BI_DIR.UP, reason="collectleft_find_high")
+                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BiDirection.UP, reason="collectleft_find_high")
         else:
             peak_bi = FindPeakBi(bi_lst[last_seg_end_bi.idx+3:], is_high=False)
             if peak_bi and peak_bi.idx - last_seg_end_bi.idx >= 3:
-                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BI_DIR.DOWN, reason="collectleft_find_low")
+                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BiDirection.DOWN, reason="collectleft_find_low")
         last_seg_end_bi = self[-1].end_bi
 
         self.collect_left_as_seg(bi_lst)
@@ -90,16 +90,16 @@ class CSegListComm(Generic[SUB_LINE_TYPE]):
             return
         if last_seg_end_bi.is_down() and last_bi.get_end_val() <= last_seg_end_bi.get_end_val():
             if peak_bi := FindPeakBi(bi_lst[last_seg_end_bi.idx+3:], is_high=True):
-                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BI_DIR.UP, reason="collectleft_find_high_force")
+                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BiDirection.UP, reason="collectleft_find_high_force")
                 self.collect_left_seg(bi_lst)
         elif last_seg_end_bi.is_up() and last_bi.get_end_val() >= last_seg_end_bi.get_end_val():
             if peak_bi := FindPeakBi(bi_lst[last_seg_end_bi.idx+3:], is_high=False):
-                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BI_DIR.DOWN, reason="collectleft_find_low_force")
+                self.add_new_seg(bi_lst, peak_bi.idx, is_sure=False, seg_dir=BiDirection.DOWN, reason="collectleft_find_low_force")
                 self.collect_left_seg(bi_lst)
         # 剩下线段的尾部相比于最后一个线段的尾部，高低关系和最后一个虚线段的方向一致
-        elif self.config.left_method == LEFT_SEG_METHOD.ALL:  # 容易找不到二类买卖点！！
+        elif self.config.left_method == LeftSegMethod.ALL:  # 容易找不到二类买卖点！！
             self.collect_left_as_seg(bi_lst)
-        elif self.config.left_method == LEFT_SEG_METHOD.PEAK:
+        elif self.config.left_method == LeftSegMethod.PEAK:
             self.collect_left_seg_peak_method(last_seg_end_bi, bi_lst)
         else:
             raise CChanException(f"unknown seg left_method = {self.config.left_method}", ErrCode.PARA_ERROR)

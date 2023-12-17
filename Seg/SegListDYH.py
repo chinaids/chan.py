@@ -1,5 +1,5 @@
 from Bi.BiList import CBiList
-from Common.CEnum import BI_DIR, SEG_TYPE
+from Common.CEnum import BiDirection, SegType
 
 from .SegConfig import CSegConfig
 from .SegListComm import CSegListComm
@@ -26,7 +26,7 @@ def situation2(cur_bi, next_bi, pre_bi):
 
 
 class CSegListDYH(CSegListComm):
-    def __init__(self, seg_config=CSegConfig(), lv=SEG_TYPE.BI):
+    def __init__(self, seg_config=CSegConfig(), lv=SegType.BI):
         super(CSegListDYH, self).__init__(seg_config=seg_config, lv=lv)
         self.sure_seg_update_end = False
 
@@ -64,13 +64,13 @@ class CSegListDYH(CSegListComm):
             return
         last_seg_dir = self[-1].end_bi.dir
         end_bi = None
-        peak_value = float("inf") if last_seg_dir == BI_DIR.UP else float("-inf")
+        peak_value = float("inf") if last_seg_dir == BiDirection.UP else float("-inf")
         for bi in bi_lst[self[-1].end_bi.idx+3:]:
             if bi.dir == last_seg_dir:
                 continue
-            cur_value = bi._low() if last_seg_dir == BI_DIR.UP else bi._high()
-            if (last_seg_dir == BI_DIR.UP and cur_value < peak_value) or \
-               (last_seg_dir == BI_DIR.DOWN and cur_value > peak_value):
+            cur_value = bi._low() if last_seg_dir == BiDirection.UP else bi._high()
+            if (last_seg_dir == BiDirection.UP and cur_value < peak_value) or \
+               (last_seg_dir == BiDirection.DOWN and cur_value > peak_value):
                 end_bi = bi
                 peak_value = cur_value
         if end_bi:

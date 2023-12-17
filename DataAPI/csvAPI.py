@@ -1,10 +1,10 @@
 import os
 
-from Common.CEnum import DATA_FIELD, KL_TYPE
+from Common.CEnum import DATA_FIELD, KlineType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Common.func_util import str2float
-from KLine.KLine_Unit import CKLine_Unit
+from KLine.KLine_Unit import CKLineUnit
 
 from .CommonStockAPI import CCommonStockApi
 
@@ -41,7 +41,7 @@ def parse_time_column(inp):
 
 
 class CSV_API(CCommonStockApi):
-    def __init__(self, code, k_type=KL_TYPE.K_DAY, begin_date=None, end_date=None, autype=None):
+    def __init__(self, code, k_type=KlineType.K_DAY, begin_date=None, end_date=None, autype=None):
         self.headers_exist = True  # 第一行是否是标题，如果是数据，设置为False
         self.columns = [
             DATA_FIELD.FIELD_TIME,
@@ -72,7 +72,7 @@ class CSV_API(CCommonStockApi):
                 continue
             if self.end_date is not None and data[self.time_column_idx] > self.end_date:
                 continue
-            yield CKLine_Unit(create_item_dict(data, self.columns))
+            yield CKLineUnit(create_item_dict(data, self.columns))
 
     def SetBasciInfo(self):
         pass

@@ -2,7 +2,7 @@ from typing import List
 
 from Bi.BiConfig import CBiConfig
 from BuySellPoint.BSPointConfig import CBSPointConfig
-from Common.CEnum import TREND_TYPE
+from Common.CEnum import TrendType
 from Common.ChanException import CChanException, ErrCode
 from Common.func_util import _parse_inf
 from Math.BOLL import BollModel
@@ -80,11 +80,11 @@ class CChanConfig:
                 signalperiod=self.macd_config['signal'],
             )
         ]
-        res.extend(CTrendModel(TREND_TYPE.MEAN, mean_T) for mean_T in self.mean_metrics)
+        res.extend(CTrendModel(TrendType.MEAN, mean_T) for mean_T in self.mean_metrics)
 
         for trend_T in self.trend_metrics:
-            res.append(CTrendModel(TREND_TYPE.MAX, trend_T))
-            res.append(CTrendModel(TREND_TYPE.MIN, trend_T))
+            res.append(CTrendModel(TrendType.MAX, trend_T))
+            res.append(CTrendModel(TrendType.MIN, trend_T))
         res.append(BollModel(self.boll_n))
         if self.cal_demark:
             res.append(CDemarkEngine(

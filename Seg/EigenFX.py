@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from Bi.Bi import CBi
 from Bi.BiList import CBiList
-from Common.CEnum import BI_DIR, FX_TYPE, KLINE_DIR, SEG_TYPE
+from Common.CEnum import BiDirection, FenxingType, KLineDir, SegType
 from Common.ChanException import CChanException, ErrCode
 from Common.func_util import revert_bi_dir
 
@@ -10,13 +10,13 @@ from .Eigen import CEigen
 
 
 class CEigenFX:
-    def __init__(self, _dir: BI_DIR, exclude_included=True, lv=SEG_TYPE.BI):
+    def __init__(self, _dir: BiDirection, exclude_included=True, lv=SegType.BI):
         self.lv = lv
         self.dir = _dir  # 线段方向
         self.ele: List[Optional[CEigen]] = [None, None, None]
         self.lst: List[CBi] = []
         self.exclude_included = exclude_included
-        self.kl_dir = KLINE_DIR.UP if _dir == BI_DIR.UP else KLINE_DIR.DOWN
+        self.kl_dir = KLineDir.UP if _dir == BiDirection.UP else KLineDir.DOWN
         self.last_evidence_bi: Optional[CBi] = None
 
     def treat_first_ele(self, bi: CBi) -> bool:
@@ -26,7 +26,7 @@ class CEigenFX:
     def treat_second_ele(self, bi: CBi) -> bool:
         assert self.ele[0] is not None
         combine_dir = self.ele[0].try_add(bi, exclude_included=self.exclude_included)
-        if combine_dir != KLINE_DIR.COMBINE:  # 不能合并
+        if combine_dir != KLineDir.COMBINE:  # 不能合并
             self.ele[1] = CEigen(bi, self.kl_dir)
             if (self.is_up() and self.ele[1].high < self.ele[0].high) or \
                (self.is_down() and self.ele[1].low > self.ele[0].low):  # 前两元素不可能成为分形
@@ -39,14 +39,14 @@ class CEigenFX:
         self.last_evidence_bi = bi
         allow_top_equal = (1 if bi.is_down() else -1) if self.exclude_included else None
         combine_dir = self.ele[1].try_add(bi, allow_top_equal=allow_top_equal)
-        if combine_dir == KLINE_DIR.COMBINE:
+        if combine_dir == KLineDir.COMBINE:
             return False
         self.ele[2] = CEigen(bi, combine_dir)
         if not self.actual_break():
             return self.reset()
         self.ele[1].update_fx(self.ele[0], self.ele[2], exclude_included=self.exclude_included, allow_top_equal=allow_top_equal)  # type: ignore
         fx = self.ele[1].fx
-        is_fx = (self.is_up() and fx == FX_TYPE.TOP) or (self.is_down() and fx == FX_TYPE.BOTTOM)
+        is_fx = (self.is_up() and fx == FenxingType.TOP) or (self.is_down() and fx == FenxingType.BOTTOM)
         return True if is_fx else self.reset()
 
     def add(self, bi: CBi) -> bool:  # 返回是否出现分形
@@ -88,10 +88,10 @@ class CEigenFX:
             return True
 
     def is_down(self):
-        return self.dir == BI_DIR.DOWN
+        return self.dir == BiDirection.DOWN
 
     def is_up(self):
-        return self.dir == BI_DIR.UP
+        return self.dir == BiDirection.UP
 
     def GetPeakBiIdx(self):
         assert self.ele[1] is not None

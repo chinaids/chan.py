@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from Common.CEnum import BSP_TYPE, MACD_ALGO
+from Common.CEnum import BuySellPointType, MACDAlgo
 from Common.func_util import _parse_inf
 
 
@@ -37,7 +37,7 @@ class CPointConfig:
         self.SetMacdAlgo(macd_algo)
         self.bs1_peak = bs1_peak
         self.tmp_target_types = bs_type
-        self.target_types: List[BSP_TYPE] = []
+        self.target_types: List[BuySellPointType] = []
         self.bsp2_follow_1 = bsp2_follow_1
         self.bsp3_follow_1 = bsp3_follow_1
         self.bsp3_peak = bsp3_peak
@@ -46,7 +46,7 @@ class CPointConfig:
         self.strict_bsp3 = strict_bsp3
 
     def parse_target_type(self):
-        _d: Dict[str, BSP_TYPE] = {x.value: x for x in BSP_TYPE}
+        _d: Dict[str, BuySellPointType] = {x.value: x for x in BuySellPointType}
         if isinstance(self.tmp_target_types, str):
             self.tmp_target_types = [t.strip() for t in self.tmp_target_types.split(",")]
         for target_t in self.tmp_target_types:
@@ -55,18 +55,18 @@ class CPointConfig:
 
     def SetMacdAlgo(self, macd_algo):
         _d = {
-            "area": MACD_ALGO.AREA,
-            "peak": MACD_ALGO.PEAK,
-            "full_area": MACD_ALGO.FULL_AREA,
-            "diff": MACD_ALGO.DIFF,
-            "slope": MACD_ALGO.SLOPE,
-            "amp": MACD_ALGO.AMP,
-            "amount": MACD_ALGO.AMOUNT,
-            "volumn": MACD_ALGO.VOLUMN,
-            "amount_avg": MACD_ALGO.AMOUNT_AVG,
-            "volumn_avg": MACD_ALGO.VOLUMN_AVG,
-            "turnrate_avg": MACD_ALGO.AMOUNT_AVG,
-            "rsi": MACD_ALGO.RSI,
+            "area": MACDAlgo.AREA,
+            "peak": MACDAlgo.PEAK,
+            "full_area": MACDAlgo.FULL_AREA,
+            "diff": MACDAlgo.DIFF,
+            "slope": MACDAlgo.SLOPE,
+            "amp": MACDAlgo.AMP,
+            "amount": MACDAlgo.AMOUNT,
+            "volumn": MACDAlgo.VOLUME,
+            "amount_avg": MACDAlgo.AMOUNT_AVG,
+            "volumn_avg": MACDAlgo.VOLUME_AVG,
+            "turnrate_avg": MACDAlgo.AMOUNT_AVG,
+            "rsi": MACDAlgo.RSI,
         }
         self.macd_algo = _d[macd_algo]
 

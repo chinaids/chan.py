@@ -2,7 +2,7 @@ from typing import Generic, List, Optional, TypeVar, Union, overload
 
 from Bi.Bi import CBi
 from Bi.BiList import CBiList
-from Common.CEnum import BSP_TYPE
+from Common.CEnum import BuySellPointType
 from Common.func_util import has_overlap
 from Seg.Seg import CSeg
 from Seg.SegListComm import CSegListComm
@@ -59,7 +59,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
 
     def add_bs(
         self,
-        bs_type: BSP_TYPE,
+        bs_type: BuySellPointType,
         bi: LINE_TYPE,
         relate_bsp1: Optional[CBS_Point],
         is_target_bsp: bool = True,
@@ -74,7 +74,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
         if bs_type not in self.config.GetBSConfig(is_buy).target_types:
             is_target_bsp = False
 
-        if is_target_bsp or bs_type in [BSP_TYPE.T1, BSP_TYPE.T1P]:
+        if is_target_bsp or bs_type in [BuySellPointType.T1, BuySellPointType.T1P]:
             bsp = CBS_Point[LINE_TYPE](
                 bi=bi,
                 is_buy=is_buy,
@@ -86,7 +86,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
             return
         if is_target_bsp:
             self.lst.append(bsp)
-        if bs_type in [BSP_TYPE.T1, BSP_TYPE.T1P]:
+        if bs_type in [BuySellPointType.T1, BuySellPointType.T1P]:
             self.bsp1_lst.append(bsp)
 
     def cal_seg_bs1point(self, seg_list: CSegListComm[LINE_TYPE], bi_list: LINE_LIST_TYPE):
@@ -116,7 +116,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
         if not is_diver:
             is_target_bsp = False
         feature_dict = {'divergence_rate': divergence_rate}
-        self.add_bs(bs_type=BSP_TYPE.T1, bi=seg.end_bi, relate_bsp1=None, is_target_bsp=is_target_bsp, feature_dict=feature_dict)
+        self.add_bs(bs_type=BuySellPointType.T1, bi=seg.end_bi, relate_bsp1=None, is_target_bsp=is_target_bsp, feature_dict=feature_dict)
 
     def treat_pz_bsp1(self, seg: CSeg[LINE_TYPE], BSP_CONF: CPointConfig, bi_list: LINE_LIST_TYPE, is_target_bsp):
         last_bi = seg.end_bi
@@ -137,7 +137,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
         if isinstance(bi_list, CBiList):
             assert isinstance(last_bi, CBi) and isinstance(pre_bi, CBi)
         feature_dict = {'divergence_rate': divergence_rate}
-        self.add_bs(bs_type=BSP_TYPE.T1P, bi=last_bi, relate_bsp1=None, is_target_bsp=is_target_bsp, feature_dict=feature_dict)
+        self.add_bs(bs_type=BuySellPointType.T1P, bi=last_bi, relate_bsp1=None, is_target_bsp=is_target_bsp, feature_dict=feature_dict)
 
     def cal_seg_bs2point(self, seg_list: CSegListComm[LINE_TYPE], bi_list: LINE_LIST_TYPE):
         bsp1_bi_idx_dict = {bsp.bi.idx: bsp for bsp in self.bsp1_lst}
@@ -169,7 +169,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
         retrace_rate = bsp2_bi.amp()/break_bi.amp()
         bsp2_flag = retrace_rate <= BSP_CONF.max_bs2_rate
         if bsp2_flag:
-            self.add_bs(bs_type=BSP_TYPE.T2, bi=bsp2_bi, relate_bsp1=real_bsp1)  # type: ignore
+            self.add_bs(bs_type=BuySellPointType.T2, bi=bsp2_bi, relate_bsp1=real_bsp1)  # type: ignore
         elif BSP_CONF.bsp2s_follow_2:
             return
         self.treat_bsp2s(seg_list, bi_list, bsp2_bi, break_bi, real_bsp1, BSP_CONF)  # type: ignore
@@ -206,7 +206,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
             if retrace_rate > BSP_CONF.max_bs2_rate:
                 break
 
-            self.add_bs(bs_type=BSP_TYPE.T2S, bi=bsp2s_bi, relate_bsp1=real_bsp1)  # type: ignore
+            self.add_bs(bs_type=BuySellPointType.T2S, bi=bsp2s_bi, relate_bsp1=real_bsp1)  # type: ignore
             bias += 2
 
     def cal_seg_bs3point(self, seg_list: CSegListComm[LINE_TYPE], bi_list: LINE_LIST_TYPE):
@@ -265,7 +265,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
         bsp3_peak_zs = bsp3_break_zspeak(bsp3_bi, first_zs)
         if BSP_CONF.bsp3_peak and not bsp3_peak_zs:
             return
-        self.add_bs(bs_type=BSP_TYPE.T3A, bi=bsp3_bi, relate_bsp1=real_bsp1)  # type: ignore
+        self.add_bs(bs_type=BuySellPointType.T3A, bi=bsp3_bi, relate_bsp1=real_bsp1)  # type: ignore
 
     def treat_bsp3_before(
         self,
@@ -294,7 +294,7 @@ class CBSPointList(Generic[LINE_TYPE, LINE_LIST_TYPE]):
                 break
             if bsp3_back2zs(bsp3_bi, cmp_zs):  # type: ignore
                 continue
-            self.add_bs(bs_type=BSP_TYPE.T3B, bi=bsp3_bi, relate_bsp1=real_bsp1)  # type: ignore
+            self.add_bs(bs_type=BuySellPointType.T3B, bi=bsp3_bi, relate_bsp1=real_bsp1)  # type: ignore
             break
 
     def getLastestBspList(self) -> List[CBS_Point[LINE_TYPE]]:

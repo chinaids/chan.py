@@ -1,9 +1,9 @@
 from typing import Generic, Iterable, List, Optional, Self, TypeVar, Union, overload
 
 from Common.cache import make_cache
-from Common.CEnum import FX_TYPE, KLINE_DIR
+from Common.CEnum import FenxingType, KLineDir
 from Common.ChanException import CChanException, ErrCode
-from KLine.KLine_Unit import CKLine_Unit
+from KLine.KLine_Unit import CKLineUnit
 
 from .Combine_Item import CCombine_Item
 
@@ -21,7 +21,7 @@ class CKLine_Combiner(Generic[T]):
         self.__lst: List[T] = [kl_unit]  # 本级别每一根单位K线
 
         self.__dir = _dir
-        self.__fx = FX_TYPE.UNKNOWN
+        self.__fx = FenxingType.UNKNOWN
         self.__pre: Optional[Self] = None
         self.__next: Optional[Self] = None
 
@@ -63,17 +63,17 @@ class CKLine_Combiner(Generic[T]):
 
     def test_combine(self, item: CCombine_Item, exclude_included=False, allow_top_equal=None):
         if (self.high >= item.high and self.low <= item.low):
-            return KLINE_DIR.COMBINE
+            return KLineDir.COMBINE
         if (self.high <= item.high and self.low >= item.low):
             if allow_top_equal == 1 and self.high == item.high and self.low > item.low:
-                return KLINE_DIR.DOWN
+                return KLineDir.DOWN
             elif allow_top_equal == -1 and self.low == item.low and self.high < item.high:
-                return KLINE_DIR.UP
-            return KLINE_DIR.INCLUDED if exclude_included else KLINE_DIR.COMBINE
+                return KLineDir.UP
+            return KLineDir.INCLUDED if exclude_included else KLineDir.COMBINE
         if (self.high > item.high and self.low > item.low):
-            return KLINE_DIR.DOWN
+            return KLineDir.DOWN
         if (self.high < item.high and self.low < item.low):
-            return KLINE_DIR.UP
+            return KLineDir.UP
         else:
             raise CChanException("combine type unknown", ErrCode.COMBINER_ERR)
 
@@ -81,7 +81,7 @@ class CKLine_Combiner(Generic[T]):
         # only for deepcopy
         self.__lst.append(unit_kl)
 
-    def set_fx(self, fx: FX_TYPE):
+    def set_fx(self, fx: FenxingType):
         # only for deepcopy
         self.__fx = fx
 
@@ -91,20 +91,20 @@ class CKLine_Combiner(Generic[T]):
         # allow_top_equal = -1 被包含，底部相等不合并
         combine_item = CCombine_Item(unit_kl)
         _dir = self.test_combine(combine_item, exclude_included, allow_top_equal)
-        if _dir == KLINE_DIR.COMBINE:
+        if _dir == KLineDir.COMBINE:
             self.__lst.append(unit_kl)
-            if isinstance(unit_kl, CKLine_Unit):
+            if isinstance(unit_kl, CKLineUnit):
                 unit_kl.set_klc(self)
-            if self.dir == KLINE_DIR.UP:
+            if self.dir == KLineDir.UP:
                 if combine_item.high != combine_item.low or combine_item.high != self.high:  # 处理一字K线
                     self.__high = max([self.high, combine_item.high])
                     self.__low = max([self.low, combine_item.low])
-            elif self.dir == KLINE_DIR.DOWN:
+            elif self.dir == KLineDir.DOWN:
                 if combine_item.high != combine_item.low or combine_item.low != self.low:  # 处理一字K线
                     self.__high = min([self.high, combine_item.high])
                     self.__low = min([self.low, combine_item.low])
             else:
-                raise CChanException(f"KLINE_DIR = {self.dir} err!!! must be {KLINE_DIR.UP}/{KLINE_DIR.DOWN}", ErrCode.COMBINER_ERR)
+                raise CChanException(f"KLINE_DIR = {self.dir} err!!! must be {KLineDir.UP}/{KLineDir.DOWN}", ErrCode.COMBINER_ERR)
             self._time_end = combine_item.time_end
             self.clean_cache()
         # 返回UP/DOWN/COMBINE给KL_LIST，设置下一个的方向
@@ -138,14 +138,14 @@ class CKLine_Combiner(Generic[T]):
         if exclude_included:
             if _pre.high < self.high and _next.high <= self.high and _next.low < self.low:
                 if allow_top_equal == 1 or _next.high < self.high:
-                    self.__fx = FX_TYPE.TOP
+                    self.__fx = FenxingType.TOP
             elif _next.high > self.high and _pre.low > self.low and _next.low >= self.low:
                 if allow_top_equal == -1 or _next.low > self.low:
-                    self.__fx = FX_TYPE.BOTTOM
+                    self.__fx = FenxingType.BOTTOM
         elif _pre.high < self.high and _next.high < self.high and _pre.low < self.low and _next.low < self.low:
-            self.__fx = FX_TYPE.TOP
+            self.__fx = FenxingType.TOP
         elif _pre.high > self.high and _next.high > self.high and _pre.low > self.low and _next.low > self.low:
-            self.__fx = FX_TYPE.BOTTOM
+            self.__fx = FenxingType.BOTTOM
         self.clean_cache()
 
     def __str__(self):

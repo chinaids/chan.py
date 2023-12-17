@@ -1,6 +1,6 @@
 from typing import List, Optional, Union, overload
 
-from Common.CEnum import FX_TYPE, KLINE_DIR
+from Common.CEnum import FenxingType, KLineDir
 from KLine.KLine import CKLine
 
 from .Bi import CBi
@@ -75,7 +75,7 @@ class CBiList:
         _tmp_end = self.get_last_klu_of_last_bi()
         self.delete_virtual_bi()
         # 返回值：是否出现新笔
-        if klc.fx == FX_TYPE.UNKNOWN:
+        if klc.fx == FenxingType.UNKNOWN:
             return _tmp_end != self.get_last_klu_of_last_bi()  # 虚笔是否有变
         if self.last_end is None or len(self.bi_list) == 0:
             return self.try_create_first_bi(klc)
@@ -113,7 +113,7 @@ class CBiList:
             assert _tmp_klc is not None
             if not self.satisfy_bi_span(_tmp_klc, self[-1].end_klc):
                 return False
-            if ((self[-1].is_down() and _tmp_klc.dir == KLINE_DIR.UP and _tmp_klc.low > self[-1].end_klc.low) or (self[-1].is_up() and _tmp_klc.dir == KLINE_DIR.DOWN and _tmp_klc.high < self[-1].end_klc.high)) and self[-1].end_klc.check_fx_valid(_tmp_klc, self.config.bi_fx_check, for_virtual=True):
+            if ((self[-1].is_down() and _tmp_klc.dir == KLineDir.UP and _tmp_klc.low > self[-1].end_klc.low) or (self[-1].is_up() and _tmp_klc.dir == KLineDir.DOWN and _tmp_klc.high < self[-1].end_klc.high)) and self[-1].end_klc.check_fx_valid(_tmp_klc, self.config.bi_fx_check, for_virtual=True):
                 # 新增一笔
                 self.add_new_bi(self.last_end, _tmp_klc, is_sure=False)
                 return True
@@ -168,8 +168,8 @@ class CBiList:
         if len(self.bi_list) == 0:
             return False
         last_bi = self.bi_list[-1]
-        if (last_bi.is_up() and klc.fx == FX_TYPE.TOP and klc.high >= last_bi.get_end_val()) or \
-           (last_bi.is_down() and klc.fx == FX_TYPE.BOTTOM and klc.low <= last_bi.get_end_val()):
+        if (last_bi.is_up() and klc.fx == FenxingType.TOP and klc.high >= last_bi.get_end_val()) or \
+           (last_bi.is_down() and klc.fx == FenxingType.BOTTOM and klc.low <= last_bi.get_end_val()):
             last_bi.update_new_end(klc)
             self.last_end = klc
             return True
@@ -181,7 +181,7 @@ class CBiList:
 
 
 def end_is_peak(last_end: CKLine, cur_end: CKLine) -> bool:
-    if last_end.fx == FX_TYPE.BOTTOM:
+    if last_end.fx == FenxingType.BOTTOM:
         cmp_thred = cur_end.high  # 或者严格点选择get_klu_max_high()
         klc = last_end.get_next()
         while True:
@@ -190,7 +190,7 @@ def end_is_peak(last_end: CKLine, cur_end: CKLine) -> bool:
             if klc.high > cmp_thred:
                 return False
             klc = klc.get_next()
-    elif last_end.fx == FX_TYPE.TOP:
+    elif last_end.fx == FenxingType.TOP:
         cmp_thred = cur_end.low  # 或者严格点选择get_klu_min_low()
         klc = last_end.get_next()
         while True:

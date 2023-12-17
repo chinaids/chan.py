@@ -1,9 +1,9 @@
 from typing import Generic, List, Optional, Self, TypeVar
 
 from Bi.Bi import CBi
-from Common.CEnum import BI_DIR, MACD_ALGO, TREND_LINE_SIDE
+from Common.CEnum import BiDirection, MACDAlgo, TrendLineScope
 from Common.ChanException import CChanException, ErrCode
-from KLine.KLine_Unit import CKLine_Unit
+from KLine.KLine_Unit import CKLineUnit
 from Math.TrendLine import CTrendLine
 
 from .EigenFX import CEigenFX
@@ -80,10 +80,10 @@ class CSeg(Generic[LINE_TYPE]):
         return self.end_bi.get_end_klu().high if self.is_up() else self.start_bi.get_begin_klu().high
 
     def is_down(self):
-        return self.dir == BI_DIR.DOWN
+        return self.dir == BiDirection.DOWN
 
     def is_up(self):
-        return self.dir == BI_DIR.UP
+        return self.dir == BiDirection.UP
 
     def get_end_val(self):
         return self.end_bi.get_end_val()
@@ -94,19 +94,19 @@ class CSeg(Generic[LINE_TYPE]):
     def amp(self):
         return abs(self.get_end_val() - self.get_begin_val())
 
-    def get_end_klu(self) -> CKLine_Unit:
+    def get_end_klu(self) -> CKLineUnit:
         return self.end_bi.get_end_klu()
 
-    def get_begin_klu(self) -> CKLine_Unit:
+    def get_begin_klu(self) -> CKLineUnit:
         return self.start_bi.get_begin_klu()
 
     def get_klu_cnt(self):
         return self.get_end_klu().idx - self.get_begin_klu().idx + 1
 
     def cal_macd_metric(self, macd_algo, is_reverse):
-        if macd_algo == MACD_ALGO.SLOPE:
+        if macd_algo == MACDAlgo.SLOPE:
             return self.Cal_MACD_slope()
-        elif macd_algo == MACD_ALGO.AMP:
+        elif macd_algo == MACDAlgo.AMP:
             return self.Cal_MACD_amp()
         else:
             raise CChanException(f"unsupport macd_algo={macd_algo} of Seg, should be one of slope/amp", ErrCode.PARA_ERROR)
@@ -132,8 +132,8 @@ class CSeg(Generic[LINE_TYPE]):
             bi_lst[bi_idx].parent_seg = self
             self.bi_list.append(bi_lst[bi_idx])
         if len(self.bi_list) >= 3:
-            self.support_trend_line = CTrendLine(self.bi_list, TREND_LINE_SIDE.INSIDE)
-            self.resistance_trend_line = CTrendLine(self.bi_list, TREND_LINE_SIDE.OUTSIDE)
+            self.support_trend_line = CTrendLine(self.bi_list, TrendLineScope.INSIDE)
+            self.resistance_trend_line = CTrendLine(self.bi_list, TrendLineScope.OUTSIDE)
 
     def get_first_multi_bi_zs(self):
         return next((zs for zs in self.zs_lst if not zs.is_one_bi_zs()), None)

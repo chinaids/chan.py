@@ -2,7 +2,7 @@ from typing import List
 
 from Bi.Bi import CBi
 from BuySellPoint.BS_Point import CBS_Point
-from Common.CEnum import FX_TYPE
+from Common.CEnum import FenxingType
 from KLine.KLine import CKLine
 from KLine.KLine_List import CKLine_List
 from Seg.Eigen import CEigen
@@ -17,7 +17,7 @@ class Cklc_meta:
         self.low = klc.low
         self.begin_idx = klc.lst[0].idx
         self.end_idx = klc.lst[-1].idx
-        self.type = klc.fx if klc.fx != FX_TYPE.UNKNOWN else klc.dir
+        self.type = klc.fx if klc.fx != FenxingType.UNKNOWN else klc.dir
 
         self.klu_list = list(klc.lst)
 

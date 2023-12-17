@@ -3,13 +3,13 @@ from typing import List
 
 from Chan import CChan
 from ChanConfig import CChanConfig
-from Common.CEnum import AUTYPE, DATA_FIELD, DATA_SRC, KL_TYPE
+from Common.CEnum import AUTYPE, DATA_FIELD, DataSrc, KlineType
 from DataAPI.BaoStockAPI import CBaoStock
-from KLine.KLine_Unit import CKLine_Unit
+from KLine.KLine_Unit import CKLineUnit
 
 
-def combine_60m_klu_form_15m(klu_15m_lst: List[CKLine_Unit]) -> CKLine_Unit:
-    return CKLine_Unit(
+def combine_60m_klu_form_15m(klu_15m_lst: List[CKLineUnit]) -> CKLineUnit:
+    return CKLineUnit(
         {
             DATA_FIELD.FIELD_TIME: klu_15m_lst[-1].time,
             DATA_FIELD.FIELD_OPEN: klu_15m_lst[0].open,
@@ -27,8 +27,8 @@ if __name__ == "__main__":
     code = "sz.000001"
     begin_time = "2023-09-10"
     end_time = None
-    data_src_type = DATA_SRC.BAO_STOCK
-    lv_list = [KL_TYPE.K_60M, KL_TYPE.K_15M]
+    data_src_type = DataSrc.BAO_STOCK
+    lv_list = [KlineType.K_60M, KlineType.K_15M]
 
     config = CChanConfig({
         "triger_step": True,
@@ -42,9 +42,9 @@ if __name__ == "__main__":
         config=config,
     )
     CBaoStock.do_init()
-    data_src = CBaoStock(code, k_type=KL_TYPE.K_15M, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)  # 获取最小级别
+    data_src = CBaoStock(code, k_type=KlineType.K_15M, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)  # 获取最小级别
 
-    klu_15m_lst_tmp: List[CKLine_Unit] = []  # 存储用于合成当前60M K线的15M k线
+    klu_15m_lst_tmp: List[CKLineUnit] = []  # 存储用于合成当前60M K线的15M k线
 
     for klu_15m in data_src.get_kl_data():  # 获取单根15分钟K线
         klu_15m_lst_tmp.append(klu_15m)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         如果是用序列化方式，这里可以采用pickle.load()
         """
         chan: CChan = copy.deepcopy(chan_snapshot)
-        chan.trigger_load({KL_TYPE.K_60M: [klu_60m], KL_TYPE.K_15M: klu_15m_lst_tmp})
+        chan.trigger_load({KlineType.K_60M: [klu_60m], KlineType.K_15M: klu_15m_lst_tmp})
 
         """
         策略开始：

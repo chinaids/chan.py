@@ -2,45 +2,45 @@ from enum import Enum, auto
 from typing import Literal
 
 
-class DATA_SRC(Enum):
-    BAO_STOCK = auto()
-    CCXT = auto()
-    CSV = auto()
+class DataSrc(Enum):
+    BAO_STOCK = 'bao_stock'
+    CCXT = 'ccxt'  # crypto
+    CSV = 'csv'
 
 
-class KL_TYPE(Enum):
-    K_1M = auto()
-    K_DAY = auto()
-    K_WEEK = auto()
-    K_MON = auto()
-    K_YEAR = auto()
-    K_5M = auto()
-    K_15M = auto()
-    K_30M = auto()
-    K_60M = auto()
-    K_3M = auto()
-    K_QUARTER = auto()
+class KLineType(Enum):
+    K_1M = '1m'
+    K_DAY = 'day'
+    K_WEEK = 'week'
+    K_MON = 'month'
+    K_YEAR = 'year'
+    K_5M = '5m'
+    K_15M = '15m'
+    K_30M = '30m'
+    K_60M = '60m'
+    K_3M = '3m'
+    K_QUARTER = 'quarter'
 
 
-class KLINE_DIR(Enum):
-    UP = auto()
-    DOWN = auto()
-    COMBINE = auto()
-    INCLUDED = auto()
+class KLineDir(Enum):
+    UP = 'up'
+    DOWN = 'down'
+    COMBINE = 'combine'
+    INCLUDED = 'included'
 
 
-class FX_TYPE(Enum):
+class FenxingType(Enum):
     BOTTOM = auto()
     TOP = auto()
     UNKNOWN = auto()
 
 
-class BI_DIR(Enum):
-    UP = auto()
-    DOWN = auto()
+class BiDirection(Enum):
+    UP = 'up'
+    DOWN = 'down'
 
 
-class BI_TYPE(Enum):
+class BiType(Enum):
     UNKNOWN = auto()
     STRICT = auto()
     SUB_VALUE = auto()  # 次高低点成笔
@@ -54,7 +54,7 @@ class BI_TYPE(Enum):
 BSP_MAIN_TYPE = Literal['1', '2', '3']
 
 
-class BSP_TYPE(Enum):
+class BuySellPointType(Enum):
     T1 = '1'
     T1P = '1p'
     T2 = '2'
@@ -66,50 +66,50 @@ class BSP_TYPE(Enum):
         return self.value[0]  # type: ignore
 
 
-class AUTYPE(Enum):
-    QFQ = auto()
-    HFQ = auto()
-    NONE = auto()
+class AdjustmentType(Enum):
+    QFQ = auto()  # 前复权
+    HFQ = auto()  # 后复权
+    NONE = auto()  # 不复权
 
 
-class TREND_TYPE(Enum):
+class TrendType(Enum):
     MEAN = "mean"
     MAX = "max"
     MIN = "min"
 
 
-class TREND_LINE_SIDE(Enum):
-    INSIDE = auto()
-    OUTSIDE = auto()
+class TrendLineScope(Enum):
+    INSIDE = 'inside'
+    OUTSIDE = 'outside'
 
 
-class LEFT_SEG_METHOD(Enum):
+class LeftSegMethod(Enum):
     ALL = auto()
     PEAK = auto()
 
 
-class FX_CHECK_METHOD(Enum):
+class FenxingCheckMethod(Enum):
     STRICT = auto()
     LOSS = auto()
     HALF = auto()
     TOTALLY = auto()
 
 
-class SEG_TYPE(Enum):
-    BI = auto()
-    SEG = auto()
+class SegType(Enum):
+    BI = 'bi'
+    SEG = 'seg'
 
 
-class MACD_ALGO(Enum):
+class MACDAlgo(Enum):
     AREA = auto()
     PEAK = auto()
     FULL_AREA = auto()
     DIFF = auto()
     SLOPE = auto()
     AMP = auto()
-    VOLUMN = auto()
+    VOLUME = auto()
     AMOUNT = auto()
-    VOLUMN_AVG = auto()
+    VOLUME_AVG = auto()
     AMOUNT_AVG = auto()
     TURNRATE_AVG = auto()
     RSI = auto()

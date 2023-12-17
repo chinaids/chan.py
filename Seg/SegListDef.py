@@ -1,5 +1,5 @@
 from Bi.BiList import CBiList
-from Common.CEnum import SEG_TYPE
+from Common.CEnum import SegType
 
 from .SegConfig import CSegConfig
 from .SegListComm import CSegListComm
@@ -14,7 +14,7 @@ def is_down_seg(bi, pre_bi):
 
 
 class CSegListDef(CSegListComm):
-    def __init__(self, seg_config=CSegConfig(), lv=SEG_TYPE.BI):
+    def __init__(self, seg_config=CSegConfig(), lv=SegType.BI):
         super(CSegListDef, self).__init__(seg_config=seg_config, lv=lv)
         self.sure_seg_update_end = False
 
