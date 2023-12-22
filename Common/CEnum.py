@@ -115,7 +115,7 @@ class MACDAlgo(Enum):
     RSI = auto()
 
 
-class DATA_FIELD:
+class DataField:
     FIELD_TIME = "time_key"
     FIELD_OPEN = "open"
     FIELD_HIGH = "high"
@@ -126,4 +126,4 @@ class DATA_FIELD:
     FIELD_TURNRATE = "turnover_rate"  # 换手率
 
 
-TRADE_INFO_LST = [DATA_FIELD.FIELD_VOLUME, DATA_FIELD.FIELD_TURNOVER, DATA_FIELD.FIELD_TURNRATE]
+TRADE_INFO_LST = [DataField.FIELD_VOLUME, DataField.FIELD_TURNOVER, DataField.FIELD_TURNRATE]

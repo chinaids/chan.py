@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from Common.cache import make_cache
-from Common.CEnum import BiDirection, BiType, DATA_FIELD, FenxingType, MACDAlgo
+from Common.CEnum import BiDirection, BiType, DataField, FenxingType, MACDAlgo
 from Common.ChanException import CChanException, ErrCode
 from KLine.KLine import CKLine
 from KLine.KLineUnit import CKLineUnit
@@ -191,15 +191,15 @@ class CBi:
         elif macd_algo == MACDAlgo.AMP:
             return self.cal_macd_amp()
         elif macd_algo == MACDAlgo.AMOUNT:
-            return self.cal_macd_trade_metric(DATA_FIELD.FIELD_TURNOVER, cal_avg=False)
+            return self.cal_macd_trade_metric(DataField.FIELD_TURNOVER, cal_avg=False)
         elif macd_algo == MACDAlgo.VOLUME:
-            return self.cal_macd_trade_metric(DATA_FIELD.FIELD_VOLUME, cal_avg=False)
+            return self.cal_macd_trade_metric(DataField.FIELD_VOLUME, cal_avg=False)
         elif macd_algo == MACDAlgo.VOLUME_AVG:
-            return self.cal_macd_trade_metric(DATA_FIELD.FIELD_VOLUME, cal_avg=True)
+            return self.cal_macd_trade_metric(DataField.FIELD_VOLUME, cal_avg=True)
         elif macd_algo == MACDAlgo.AMOUNT_AVG:
-            return self.cal_macd_trade_metric(DATA_FIELD.FIELD_TURNOVER, cal_avg=True)
+            return self.cal_macd_trade_metric(DataField.FIELD_TURNOVER, cal_avg=True)
         elif macd_algo == MACDAlgo.TURNRATE_AVG:
-            return self.cal_macd_trade_metric(DATA_FIELD.FIELD_TURNRATE, cal_avg=True)
+            return self.cal_macd_trade_metric(DataField.FIELD_TURNRATE, cal_avg=True)
         elif macd_algo == MACDAlgo.RSI:
             return self.Cal_Rsi()
         else:

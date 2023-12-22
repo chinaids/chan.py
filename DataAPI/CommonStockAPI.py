@@ -5,22 +5,22 @@ from KLine.KLineUnit import CKLineUnit
 
 
 class CCommonStockApi:
-    def __init__(self, code, k_type, begin_date, end_date, autype):
+    def __init__(self, code, k_type, begin_date, end_date, adjustment):
         self.code = code
         self.name = None
         self.is_stock = None
         self.k_type = k_type
         self.begin_date = begin_date
         self.end_date = end_date
-        self.autype = autype
-        self.SetBasciInfo()
+        self.adjustment = adjustment
+        self.set_basic_info()
 
     @abc.abstractmethod
     def get_kl_data(self) -> Iterable[CKLineUnit]:
         pass
 
     @abc.abstractmethod
-    def SetBasciInfo(self):
+    def set_basic_info(self):
         pass
 
     @classmethod

@@ -455,59 +455,59 @@ from Plot.PlotDriver import CPlotDriver
 config = CChanConfig({})  # 缠论计算配置，见后文
 
 chan = CChan(
-  code="HK.00700",
-  begin_time="2012-01-01",
-  end_time=None,
-  data_src=DATA_SRC.FUTU,  # 数据来源,
-  lv_list=[KlineType.K_DAY],  # 多级别可以从大到小传入
-  config=config,
-  autype=AUTYPE.QFQ,
-  extra_kl=None,
+    code="HK.00700",
+    begin_time="2012-01-01",
+    end_time=None,
+    data_src=DATA_SRC.FUTU,  # 数据来源,
+    lv_list=[KlineType.K_DAY],  # 多级别可以从大到小传入
+    config=config,
+    autype=AUTYPE.QFQ,
+    extra_kl=None,
 )
 
 plot_config = {
-  "plot_kline": True,
-  "plot_kline_combine": True,
-  "plot_bi": True,
-  "plot_seg": True,
-  "plot_eigen": False,
-  "plot_zs": True,
-  "plot_macd": False,
-  "plot_mean": False,
-  "plot_channel": False,
-  "plot_bsp": True,
-  "plot_cbsp": True,
-  "plot_extrainfo": False,
+    "plot_kline": True,
+    "plot_kline_combine": True,
+    "plot_bi": True,
+    "plot_seg": True,
+    "plot_eigen": False,
+    "plot_zs": True,
+    "plot_macd": False,
+    "plot_mean": False,
+    "plot_channel": False,
+    "plot_bsp": True,
+    "plot_cbsp": True,
+    "plot_extrainfo": False,
 }  # 绘图元素开关，详见后文
 
 plot_para = {
-  "seg": {
-    "plot_trendline": True,  # 绘制趋势线
-  },
-  "bi": {
-    "show_num": True,  # 笔是否显示序号
-    "disp_end": True,  # 是否显示首尾价格
-  },
-  "figure": {
-    "width": 24,
-  },
-  "cbsp": {
-    "plot_cover": True,  # 绘制平仓操作
-  },
+    "seg": {
+        "plot_trendline": True,  # 绘制趋势线
+    },
+    "bi": {
+        "show_num": True,  # 笔是否显示序号
+        "disp_end": True,  # 是否显示首尾价格
+    },
+    "figure": {
+        "width": 24,
+    },
+    "cbsp": {
+        "plot_cover": True,  # 绘制平仓操作
+    },
 }  # 空格绘图元素详细配置，详见后文
 
-if not config.triger_step:  # 绘制静态图
-  plot_driver = CPlotDriver(
-    chan,
-    plot_config=plot_config,
-    plot_para=plot_para,
-  )
+if not config.trigger_step:  # 绘制静态图
+    plot_driver = CPlotDriver(
+        chan,
+        plot_config=plot_config,
+        plot_para=plot_para,
+    )
 else:  # 绘制动画
-  CAnimateDriver(
-    chan,
-    plot_config=plot_config,
-    plot_para=plot_para,
-  )
+    CAnimateDriver(
+        chan,
+        plot_config=plot_config,
+        plot_para=plot_para,
+    )
 ```
 
 需要计算缠论相关数据，仅需 CChan 调用那一行；

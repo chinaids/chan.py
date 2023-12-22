@@ -1,6 +1,7 @@
 import os
+import pandas as pd
 
-from Common.CEnum import DATA_FIELD, KlineType
+from Common.CEnum import DataField, KLineType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Common.func_util import str2float
@@ -11,7 +12,7 @@ from .CommonStockAPI import CCommonStockApi
 
 def create_item_dict(data, column_name):
     for i in range(len(data)):
-        data[i] = parse_time_column(data[i]) if column_name[i] == DATA_FIELD.FIELD_TIME else str2float(data[i])
+        data[i] = parse_time_column(data[i]) if column_name[i] == DataField.FIELD_TIME else str2float(data[i])
     return dict(zip(column_name, data))
 
 
@@ -40,21 +41,21 @@ def parse_time_column(inp):
     return CTime(year, month, day, hour, minute)
 
 
-class CSV_API(CCommonStockApi):
-    def __init__(self, code, k_type=KlineType.K_DAY, begin_date=None, end_date=None, autype=None):
+class CsvAPI(CCommonStockApi):
+    def __init__(self, code, k_type=KLineType.K_DAY, begin_date=None, end_date=None, adjustment=None):
         self.headers_exist = True  # 第一行是否是标题，如果是数据，设置为False
         self.columns = [
-            DATA_FIELD.FIELD_TIME,
-            DATA_FIELD.FIELD_OPEN,
-            DATA_FIELD.FIELD_HIGH,
-            DATA_FIELD.FIELD_LOW,
-            DATA_FIELD.FIELD_CLOSE,
+            DataField.FIELD_TIME,
+            DataField.FIELD_OPEN,
+            DataField.FIELD_HIGH,
+            DataField.FIELD_LOW,
+            DataField.FIELD_CLOSE,
             # DATA_FIELD.FIELD_VOLUME,
             # DATA_FIELD.FIELD_TURNOVER,
             # DATA_FIELD.FIELD_TURNRATE,
         ]  # 每一列字段
-        self.time_column_idx = self.columns.index(DATA_FIELD.FIELD_TIME)
-        super(CSV_API, self).__init__(code, k_type, begin_date, end_date, autype)
+        self.time_column_idx = self.columns.index(DataField.FIELD_TIME)
+        super(CsvAPI, self).__init__(code, k_type, begin_date, end_date, adjustment)
 
     def get_kl_data(self):
         cur_path = os.path.dirname(os.path.realpath(__file__))
@@ -74,7 +75,26 @@ class CSV_API(CCommonStockApi):
                 continue
             yield CKLineUnit(create_item_dict(data, self.columns))
 
-    def SetBasciInfo(self):
+    def get_kl_data_from_file(self, file_path: str):
+        if not file_path.endswith('csv'):
+            raise CChanException(f"only csv file allowed, get: {file_path}", ErrCode.SRC_DATA_NOT_FOUND)
+
+        if not os.path.exists(file_path):
+            raise CChanException(f"file not exist: {file_path}", ErrCode.SRC_DATA_NOT_FOUND)
+
+        for line_number, line in enumerate(open(file_path, 'r')):
+            if self.headers_exist and line_number == 0:
+                continue
+            data = line.split(",")
+            if len(data) != len(self.columns):
+                raise CChanException(f"file format error: {file_path}", ErrCode.SRC_DATA_FORMAT_ERROR)
+            if self.begin_date is not None and data[self.time_column_idx] < self.begin_date:
+                continue
+            if self.end_date is not None and data[self.time_column_idx] > self.end_date:
+                continue
+            yield CKLineUnit(create_item_dict(data, self.columns))
+
+    def set_basic_info(self):
         pass
 
     @classmethod

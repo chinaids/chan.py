@@ -39,11 +39,11 @@ class CChanConfig:
             zs_algo=conf.get("zs_algo", "normal"),
         )
 
-        self.triger_step = conf.get("triger_step", False)
+        self.trigger_step = conf.get("trigger_step", False)
         self.skip_step = conf.get("skip_step", 0)
 
         self.kl_data_check = conf.get("kl_data_check", True)
-        self.max_kl_misalgin_cnt = conf.get("max_kl_misalgin_cnt", 2)
+        self.max_kl_misalign_cnt = conf.get("max_kl_misalign_cnt", 2)
         self.max_kl_inconsistent_cnt = conf.get("max_kl_inconsistent_cnt", 5)
         self.auto_skip_illegal_sub_lv = conf.get("auto_skip_illegal_sub_lv", False)
         self.print_warning = conf.get("print_warning", True)

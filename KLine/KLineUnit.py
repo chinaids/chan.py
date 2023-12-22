@@ -2,7 +2,7 @@ import copy
 from typing import Dict, Optional
 
 from KLine.KLine import CKLine
-from Common.CEnum import DATA_FIELD, TRADE_INFO_LST, TrendType
+from Common.CEnum import DataField, TRADE_INFO_LST, TrendType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Math.BOLL import BOLL_Metric, BollModel
@@ -20,13 +20,13 @@ class CKLineUnit:
         # _time, _close, _open, _high, _low, _extra_info={}
         self.__idx = -1
         self.kl_type = None
-        self.time: CTime = kl_dict[DATA_FIELD.FIELD_TIME]
-        self.close = kl_dict[DATA_FIELD.FIELD_CLOSE]
-        self.open = kl_dict[DATA_FIELD.FIELD_OPEN]
-        self.high = kl_dict[DATA_FIELD.FIELD_HIGH]
-        self.low = kl_dict[DATA_FIELD.FIELD_LOW]
-        self.volume = kl_dict[DATA_FIELD.FIELD_VOLUME] if DATA_FIELD.FIELD_VOLUME in kl_dict else None
-        self.turnover = kl_dict[DATA_FIELD.FIELD_TURNOVER] if DATA_FIELD.FIELD_TURNOVER in kl_dict else None
+        self.time: CTime = kl_dict[DataField.FIELD_TIME]
+        self.close = kl_dict[DataField.FIELD_CLOSE]
+        self.open = kl_dict[DataField.FIELD_OPEN]
+        self.high = kl_dict[DataField.FIELD_HIGH]
+        self.low = kl_dict[DataField.FIELD_LOW]
+        self.volume = kl_dict[DataField.FIELD_VOLUME] if DataField.FIELD_VOLUME in kl_dict else None
+        self.turnover = kl_dict[DataField.FIELD_TURNOVER] if DataField.FIELD_TURNOVER in kl_dict else None
 
         self.check(autofix)
 
@@ -37,7 +37,7 @@ class CKLineUnit:
         self.sub_kl_list = []  # 次级别KLU列表
         self.sup_kl: Optional[CKLineUnit] = None  # 指向更高级别KLU
 
-        self.__klc: Optional[CKLine] = None  # 指向KLine
+        self._klc: Optional[CKLine] = None  # 指向KLine
 
         # self.macd: Optional[CMACD_item] = None
         # self.boll: Optional[BOLL_Metric] = None
@@ -49,11 +49,11 @@ class CKLineUnit:
 
     def __deepcopy__(self, memo):
         _dict = {
-            DATA_FIELD.FIELD_TIME: self.time,
-            DATA_FIELD.FIELD_CLOSE: self.close,
-            DATA_FIELD.FIELD_OPEN: self.open,
-            DATA_FIELD.FIELD_HIGH: self.high,
-            DATA_FIELD.FIELD_LOW: self.low,
+            DataField.FIELD_TIME: self.time,
+            DataField.FIELD_CLOSE: self.close,
+            DataField.FIELD_OPEN: self.open,
+            DataField.FIELD_HIGH: self.high,
+            DataField.FIELD_LOW: self.low,
         }
         for metric in TRADE_INFO_LST:
             if metric in self.trade_info.metric:
@@ -74,11 +74,11 @@ class CKLineUnit:
 
     @property
     def klc(self):
-        assert self.__klc is not None
-        return self.__klc
+        assert self._klc is not None
+        return self._klc
 
     def set_klc(self, klc):
-        self.__klc = klc
+        self._klc = klc
 
     @property
     def idx(self):

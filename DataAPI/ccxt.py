@@ -2,7 +2,7 @@ from datetime import datetime
 
 import ccxt
 
-from Common.CEnum import AUTYPE, DATA_FIELD, KlineType
+from Common.CEnum import AUTYPE, DataField, KlineType
 from Common.CTime import CTime
 from Common.func_util import kltype_lt_day, str2float
 from KLine.KLineUnit import CKLineUnit
@@ -12,11 +12,11 @@ from .CommonStockAPI import CCommonStockApi
 
 def GetColumnNameFromFieldList(fileds: str):
     _dict = {
-        "time": DATA_FIELD.FIELD_TIME,
-        "open": DATA_FIELD.FIELD_OPEN,
-        "high": DATA_FIELD.FIELD_HIGH,
-        "low": DATA_FIELD.FIELD_LOW,
-        "close": DATA_FIELD.FIELD_CLOSE,
+        "time": DataField.FIELD_TIME,
+        "open": DataField.FIELD_OPEN,
+        "high": DataField.FIELD_HIGH,
+        "low": DataField.FIELD_LOW,
+        "close": DataField.FIELD_CLOSE,
     }
     return [_dict[x] for x in fileds.split(",")]
 
@@ -46,7 +46,7 @@ class CCXT(CCommonStockApi):
             ]
             yield CKLineUnit(self.create_item_dict(item_data, GetColumnNameFromFieldList(fields)), autofix=True)
 
-    def SetBasciInfo(self):
+    def set_basic_info(self):
         pass
 
     @classmethod
