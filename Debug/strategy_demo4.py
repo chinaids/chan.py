@@ -17,7 +17,7 @@ if __name__ == "__main__":
     lv_list = [KlineType.K_DAY, KlineType.K_30M]
 
     config = CChanConfig({
-        "triger_step": True,
+        "trigger_step": True,
         "divergence_rate": 0.8,
         "min_zs_cnt": 1,
     })
