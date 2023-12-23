@@ -1,7 +1,7 @@
 from typing import List
 
 from Bi.Bi import CBi
-from BuySellPoint.BS_Point import CBS_Point
+from BuySellPoint.BS_Point import CBuySellPoint
 from Common.CEnum import FenxingType
 from KLine.KLine import CKLine
 from KLine.KLineList import CKLine_List
@@ -101,7 +101,7 @@ class CZS_meta:
 
 
 class CBS_Point_meta:
-    def __init__(self, bsp: CBS_Point, is_seg):
+    def __init__(self, bsp: CBuySellPoint, is_seg):
         self.is_buy = bsp.is_buy
         self.type = bsp.type2str()
         self.is_seg = is_seg

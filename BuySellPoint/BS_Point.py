@@ -8,8 +8,8 @@ from Seg.Seg import CSeg
 LINE_TYPE = TypeVar('LINE_TYPE', CBi, CSeg)
 
 
-class CBS_Point(Generic[LINE_TYPE]):
-    def __init__(self, bi: LINE_TYPE, is_buy, bs_type: BuySellPointType, relate_bsp1: Optional['CBS_Point'], feature_dict=None):
+class CBuySellPoint(Generic[LINE_TYPE]):
+    def __init__(self, bi: LINE_TYPE, is_buy, bs_type: BuySellPointType, relate_bsp1: Optional['CBuySellPoint'], feature_dict=None):
         self.bi: LINE_TYPE = bi
         self.klu = bi.get_end_klu()
         self.is_buy = is_buy

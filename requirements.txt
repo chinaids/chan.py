@@ -3,3 +3,4 @@ IPython
 baostock
 pandas
 numpy
+pytest

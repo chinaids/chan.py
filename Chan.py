@@ -3,7 +3,7 @@ import datetime
 from collections import defaultdict
 from typing import Dict, Iterable, List, Optional, Union
 
-from BuySellPoint.BS_Point import CBS_Point
+from BuySellPoint.BS_Point import CBuySellPoint
 from ChanConfig import CChanConfig
 from Common.CEnum import AdjustmentType, DataSrc, KLineType
 from Common.ChanException import CChanException, ErrCode
@@ -285,7 +285,7 @@ class CChan:
         else:
             raise CChanException("query type not support", ErrCode.COMMON_ERROR)
 
-    def get_bsp(self, idx=None) -> List[CBS_Point]:
+    def get_bsp(self, idx=None) -> List[CBuySellPoint]:
         if idx is not None:
             return sorted(self[idx].bs_point_lst.lst, key=lambda x: x.klu.time)
         assert len(self.lv_list) == 1

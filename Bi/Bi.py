@@ -7,7 +7,7 @@ from KLine.KLine import CKLine
 from KLine.KLineUnit import CKLineUnit
 
 from Seg.Seg import CSeg
-from BuySellPoint.BS_Point import CBS_Point
+from BuySellPoint.BS_Point import CBuySellPoint
 
 
 class CBi:
@@ -28,7 +28,7 @@ class CBi:
 
         self.parent_seg: Optional[CSeg[CBi]] = None  # 在哪个线段里面
 
-        self.bsp: Optional[CBS_Point] = None  # 尾部是不是买卖点
+        self.bsp: Optional[CBuySellPoint] = None  # 尾部是不是买卖点
 
         self.next: Optional[CBi] = None
         self.pre: Optional[CBi] = None
