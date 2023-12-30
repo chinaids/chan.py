@@ -4,7 +4,7 @@ from Bi.Bi import CBi
 from BuySellPoint.BSPointConfig import CPointConfig
 from Common.ChanException import CChanException, ErrCode
 from Common.func_util import has_overlap
-from KLine.KLineUnit import CKLineUnit
+from kline.klineunit import KLineUnit
 from Seg.Seg import CSeg
 
 LINE_TYPE = TypeVar('LINE_TYPE', CBi, "CSeg")
@@ -21,7 +21,7 @@ class CZS(Generic[LINE_TYPE]):
         if lst is None:
             return
 
-        self.__begin: CKLineUnit = lst[0].get_begin_klu()
+        self.__begin: KLineUnit = lst[0].get_begin_klu()
         self.__begin_bi: LINE_TYPE = lst[0]  # 中枢内部的笔
 
         # self.__low = None
@@ -97,7 +97,7 @@ class CZS(Generic[LINE_TYPE]):
         return self.begin_bi.idx == self.end_bi.idx
 
     def update_zs_end(self, item):
-        self.__end: CKLineUnit = item.get_end_klu()
+        self.__end: KLineUnit = item.get_end_klu()
         self.__end_bi: CBi = item
         if item._low() < self.peak_low:
             self.__peak_low = item._low()

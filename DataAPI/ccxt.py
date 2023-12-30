@@ -2,10 +2,10 @@ from datetime import datetime
 
 import ccxt
 
-from Common.CEnum import AUTYPE, DataField, KlineType
+from Common.CEnum import AdjustmentType, DataField, KLineType
 from Common.CTime import CTime
 from Common.func_util import kltype_lt_day, str2float
-from KLine.KLineUnit import CKLineUnit
+from kline.klineunit import KLineUnit
 
 from .CommonStockAPI import CCommonStockApi
 
@@ -24,7 +24,7 @@ def GetColumnNameFromFieldList(fileds: str):
 class CCXT(CCommonStockApi):
     is_connect = None
 
-    def __init__(self, code, k_type=KlineType.K_DAY, begin_date=None, end_date=None, autype=AUTYPE.QFQ):
+    def __init__(self, code, k_type=KLineType.K_DAY, begin_date=None, end_date=None, autype=AUTYPE.QFQ):
         super(CCXT, self).__init__(code, k_type, begin_date, end_date, autype)
 
     def get_kl_data(self):
@@ -44,7 +44,7 @@ class CCXT(CCommonStockApi):
                 item[3],
                 item[4]
             ]
-            yield CKLineUnit(self.create_item_dict(item_data, GetColumnNameFromFieldList(fields)), autofix=True)
+            yield KLineUnit(self.create_item_dict(item_data, GetColumnNameFromFieldList(fields)), autofix=True)
 
     def set_basic_info(self):
         pass
@@ -59,13 +59,13 @@ class CCXT(CCommonStockApi):
 
     def __convert_type(self):
         _dict = {
-            KlineType.K_DAY: '1d',
-            KlineType.K_WEEK: '1w',
-            KlineType.K_MON: '1M',
-            KlineType.K_5M: '5m',
-            KlineType.K_15M: '15m',
-            KlineType.K_30M: '30m',
-            KlineType.K_60M: '1h',
+            KLineType.K_DAY: '1d',
+            KLineType.K_WEEK: '1w',
+            KLineType.K_MON: '1M',
+            KLineType.K_5M: '5m',
+            KLineType.K_15M: '15m',
+            KLineType.K_30M: '30m',
+            KLineType.K_60M: '1h',
         }
         return _dict[self.k_type]
 

@@ -3,7 +3,7 @@ from typing import Generic, Iterable, List, Optional, Self, TypeVar, Union, over
 from Common.cache import make_cache
 from Common.CEnum import FenxingType, KLineDir
 from Common.ChanException import CChanException, ErrCode
-from KLine.KLineUnit import CKLineUnit
+from kline.klineunit import KLineUnit
 
 from .Combine_Item import CCombine_Item
 
@@ -93,7 +93,7 @@ class CKLine_Combiner(Generic[T]):
         _dir = self.test_combine(combine_item, exclude_included, allow_top_equal)
         if _dir == KLineDir.COMBINE:
             self.__lst.append(unit_kl)
-            if isinstance(unit_kl, CKLineUnit):
+            if isinstance(unit_kl, KLineUnit):
                 unit_kl.set_klc(self)
             if self.dir == KLineDir.UP:
                 if combine_item.high != combine_item.low or combine_item.high != self.high:  # 处理一字K线

@@ -1,6 +1,6 @@
-from Chan import CChan
-from ChanConfig import CChanConfig
-from Common.CEnum import AUTYPE, BuySellPointType, DataSrc, FenxingType, KlineType
+from chan import CChan
+from chanconfig import CChanConfig
+from Common.CEnum import AUTYPE, BuySellPointType, DataSrc, FenxingType, KLineType
 
 if __name__ == "__main__":
     """
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     begin_time = "2021-01-01"
     end_time = None
     data_src = DataSrc.BAO_STOCK
-    lv_list = [KlineType.K_DAY]
+    lv_list = [KLineType.K_DAY]
 
     config = CChanConfig({
         "trigger_step": True,  # 打开开关！

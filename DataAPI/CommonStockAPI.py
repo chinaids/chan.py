@@ -1,7 +1,7 @@
 import abc
 from typing import Iterable
 
-from KLine.KLineUnit import CKLineUnit
+from kline.klineunit import KLineUnit
 
 
 class CCommonStockApi:
@@ -16,7 +16,7 @@ class CCommonStockApi:
         self.set_basic_info()
 
     @abc.abstractmethod
-    def get_kl_data(self) -> Iterable[CKLineUnit]:
+    def get_kl_data(self) -> Iterable[KLineUnit]:
         pass
 
     @abc.abstractmethod

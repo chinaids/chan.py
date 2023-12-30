@@ -6,8 +6,8 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 
-from Chan import CChan
-from Common.CEnum import BiDirection, FenxingType, KlineType, KLineDir, TrendType
+from chan import CChan
+from Common.CEnum import BiDirection, FenxingType, KLineType, KLineDir, TrendType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Math.Demark import TDemarkIndex, CDemarkEngine
@@ -39,7 +39,7 @@ def parse_single_lv_plot_config(plot_config: Union[str, dict, list]) -> Dict[str
         raise CChanException("plot_config only support list/str/dict", ErrCode.PLOT_ERR)
 
 
-def parse_plot_config(plot_config: Union[str, dict, list], lv_list: List[KlineType]) -> Dict[KlineType, Dict[str, bool]]:
+def parse_plot_config(plot_config: Union[str, dict, list], lv_list: List[KLineType]) -> Dict[KLineType, Dict[str, bool]]:
     """
     支持：
         - 传入字典
@@ -52,7 +52,7 @@ def parse_plot_config(plot_config: Union[str, dict, list], lv_list: List[KlineTy
     if isinstance(plot_config, dict):
         if all(isinstance(_key, str) for _key in plot_config.keys()):  # 单层字典
             return {lv: parse_single_lv_plot_config(plot_config) for lv in lv_list}
-        elif all(isinstance(_key, KlineType) for _key in plot_config.keys()):  # key为KL_TYPE
+        elif all(isinstance(_key, KLineType) for _key in plot_config.keys()):  # key为KL_TYPE
             for lv in lv_list:
                 assert lv in plot_config
             return {lv: parse_single_lv_plot_config(plot_config[lv]) for lv in lv_list}
@@ -82,7 +82,7 @@ def cal_y_range(meta: CChanPlotMeta, ax):
     return (y_min, y_max)
 
 
-def create_figure(plot_macd: Dict[KlineType, bool], figure_config, lv_lst: List[KlineType]) -> Tuple[Figure, Dict[KlineType, List[Axes]]]:
+def create_figure(plot_macd: Dict[KLineType, bool], figure_config, lv_lst: List[KLineType]) -> Tuple[Figure, Dict[KLineType, List[Axes]]]:
     """
     返回：
         - Figure
@@ -116,7 +116,7 @@ def create_figure(plot_macd: Dict[KlineType, bool], figure_config, lv_lst: List[
     except Exception:  # 只有一个级别，且不需要画macd
         axes = [axes]
 
-    axes_dict: Dict[KlineType, List[Axes]] = {}
+    axes_dict: Dict[KLineType, List[Axes]] = {}
     idx = 0
     for lv in lv_lst:
         if plot_macd[lv]:
@@ -164,7 +164,7 @@ class CPlotDriver:
         self.lv_lst = chan.lv_list[:len(plot_metas)]
 
         x_range = self.GetRealXrange(figure_config, plot_metas[0])
-        plot_macd: Dict[KlineType, bool] = {kl_type: conf.get("plot_macd", False) for kl_type, conf in plot_config.items()}
+        plot_macd: Dict[KLineType, bool] = {kl_type: conf.get("plot_macd", False) for kl_type, conf in plot_config.items()}
         self.figure, axes = create_figure(plot_macd, figure_config, self.lv_lst)
 
         sseg_begin = 0

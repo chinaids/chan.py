@@ -1,27 +1,27 @@
-from .CEnum import BiDirection, KlineType
+from .CEnum import BiDirection, KLineType
 
 
 def kltype_lt_day(_type):
-    return _type in [KlineType.K_1M, KlineType.K_5M, KlineType.K_15M, KlineType.K_30M, KlineType.K_60M]
+    return _type in [KLineType.K_1M, KLineType.K_5M, KLineType.K_15M, KLineType.K_30M, KLineType.K_60M]
 
 
 def kltype_lte_day(_type):
-    return _type in [KlineType.K_1M, KlineType.K_5M, KlineType.K_15M, KlineType.K_30M, KlineType.K_60M, KlineType.K_DAY]
+    return _type in [KLineType.K_1M, KLineType.K_5M, KLineType.K_15M, KLineType.K_30M, KLineType.K_60M, KLineType.K_DAY]
 
 
 def check_kltype_order(type_list: list):
     _dict = {
-        KlineType.K_1M: 1,
-        KlineType.K_3M: 2,
-        KlineType.K_5M: 3,
-        KlineType.K_15M: 4,
-        KlineType.K_30M: 5,
-        KlineType.K_60M: 6,
-        KlineType.K_DAY: 7,
-        KlineType.K_WEEK: 8,
-        KlineType.K_MON: 9,
-        KlineType.K_QUARTER: 10,
-        KlineType.K_YEAR: 11,
+        KLineType.K_1M: 1,
+        KLineType.K_3M: 2,
+        KLineType.K_5M: 3,
+        KLineType.K_15M: 4,
+        KLineType.K_30M: 5,
+        KLineType.K_60M: 6,
+        KLineType.K_DAY: 7,
+        KLineType.K_WEEK: 8,
+        KLineType.K_MON: 9,
+        KLineType.K_QUARTER: 10,
+        KLineType.K_YEAR: 11,
     }
     last_lv = float("inf")
     for kl_type in type_list:

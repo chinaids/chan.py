@@ -1,6 +1,6 @@
-from Chan import CChan
-from ChanConfig import CChanConfig
-from Common.CEnum import AUTYPE, DataSrc, KlineType
+from chan.chan import CChan
+from chan.chanconfig import CChanConfig
+from Common.CEnum import AdjustmentType, DataSrc, KLineType
 from Plot.AnimatePlotDriver import CAnimateDriver
 from Plot.PlotDriver import CPlotDriver
 
@@ -9,7 +9,7 @@ if __name__ == "__main__":
     begin_time = "2018-01-01"
     end_time = None
     data_src = DataSrc.BAO_STOCK
-    lv_list = [KlineType.K_DAY]
+    lv_list = [KLineType.K_DAY]
 
     config = CChanConfig({
         "bi_strict": True,
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         data_src=data_src,
         lv_list=lv_list,
         config=config,
-        autype=AUTYPE.QFQ,
+        autype=AdjustmentType.QFQ,
     )
 
     if not config.trigger_step:

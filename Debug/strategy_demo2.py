@@ -1,6 +1,6 @@
-from Chan import CChan
-from ChanConfig import CChanConfig
-from Common.CEnum import AUTYPE, BuySellPointType, DataSrc, FenxingType, KlineType
+from chan import CChan
+from chanconfig import CChanConfig
+from Common.CEnum import AUTYPE, BuySellPointType, DataSrc, FenxingType, KLineType
 from DataAPI.BaoStockAPI import CBaoStock
 
 if __name__ == "__main__":
@@ -13,7 +13,7 @@ if __name__ == "__main__":
     begin_time = "2021-01-01"
     end_time = None
     data_src_type = DataSrc.BAO_STOCK
-    lv_list = [KlineType.K_DAY]
+    lv_list = [KLineType.K_DAY]
 
     config = CChanConfig({
         "trigger_step": True,
@@ -31,12 +31,12 @@ if __name__ == "__main__":
         autype=AUTYPE.QFQ,  # 已经没啥用了这一行
     )
     CBaoStock.do_init()
-    data_src = CBaoStock(code, k_type=KlineType.K_DAY, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)  # 初始化数据源类
+    data_src = CBaoStock(code, k_type=KLineType.K_DAY, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)  # 初始化数据源类
 
     is_hold = False
     last_buy_price = None
     for klu in data_src.get_kl_data():  # 获取单根K线
-        chan.trigger_load({KlineType.K_DAY: [klu]})  # 喂给CChan新增k线
+        chan.trigger_load({KLineType.K_DAY: [klu]})  # 喂给CChan新增k线
         bsp_list = chan.get_bsp()
         if not bsp_list:
             continue

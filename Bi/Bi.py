@@ -3,15 +3,15 @@ from typing import List, Optional
 from Common.cache import make_cache
 from Common.CEnum import BiDirection, BiType, DataField, FenxingType, MACDAlgo
 from Common.ChanException import CChanException, ErrCode
-from KLine.KLine import CKLine
-from KLine.KLineUnit import CKLineUnit
+from kline.kline import KLine
+from kline.klineunit import KLineUnit
 
-from Seg.Seg import CSeg
-from BuySellPoint.BS_Point import CBuySellPoint
+# from Seg.Seg import CSeg
+# from BuySellPoint.BuySellPoint import CBuySellPoint
 
 
 class CBi:
-    def __init__(self, begin_klc: CKLine, end_klc: CKLine, idx: int, is_sure: bool):
+    def __init__(self, begin_klc: KLine, end_klc: KLine, idx: int, is_sure: bool):
         self._begin_klc = None  # begin_klc
         self._end_klc = None  # end_klc
         self._direction = None
@@ -23,12 +23,12 @@ class CBi:
         self._is_sure = is_sure
         self._sure_end = None
 
-        self._klc_lst: List[CKLine] = []
+        self._klc_lst: List[KLine] = []
         self._seg_idx: Optional[int] = None
 
-        self.parent_seg: Optional[CSeg[CBi]] = None  # 在哪个线段里面
+        # self.parent_seg: Optional[CSeg[CBi]] = None  # 在哪个线段里面
 
-        self.bsp: Optional[CBuySellPoint] = None  # 尾部是不是买卖点
+        # self.bsp: Optional[CBuySellPoint] = None  # 尾部是不是买卖点
 
         self.next: Optional[CBi] = None
         self.pre: Optional[CBi] = None
@@ -82,15 +82,20 @@ class CBi:
 
     def check(self):
         if self.is_down():
-            err = self.begin_klc.high > self.end_klc.low
+            err = self.begin_klc.high <= self.end_klc.low
         else:
-            err = self.begin_klc.low < self.end_klc.high
+            err = self.begin_klc.low >= self.end_klc.high
         if err:
-            raise CChanException(f"{self.idx}:{self.begin_klc[0].time}~{self.end_klc[-1].time}笔的方向和收尾位置不一致!", ErrCode.BI_ERR) from e
+            # print(f'idx: {self.idx}, is_down: {self.is_down()}, high: {self.end_klc.high}, low: {self.end_klc.low}')
 
-    def set(self, begin_klc: CKLine, end_klc: CKLine):
-        self._begin_klc: CKLine = begin_klc
-        self._end_klc: CKLine = end_klc
+            print('idx:', self.idx, 'is down:', self.is_down())
+            print('begin:', self.begin_klc)
+            print('end:', self.end_klc)
+            raise CChanException(f"{self.idx}:{self.begin_klc[0].time}~{self.end_klc[-1].time}笔的方向和收尾位置不一致!", ErrCode.BI_ERR)
+
+    def set(self, begin_klc: KLine, end_klc: KLine):
+        self._begin_klc: KLine = begin_klc
+        self._end_klc: KLine = end_klc
         if begin_klc.fx == FenxingType.BOTTOM:
             self._direction = BiDirection.UP
         elif begin_klc.fx == FenxingType.TOP:
@@ -109,14 +114,14 @@ class CBi:
         return self.end_klc.high if self.is_up() else self.end_klc.low
 
     @make_cache
-    def get_begin_klu(self) -> CKLineUnit:
+    def get_begin_klu(self) -> KLineUnit:
         if self.is_up():
             return self.begin_klc.get_peak_klu(is_high=False)
         else:
             return self.begin_klc.get_peak_klu(is_high=True)
 
     @make_cache
-    def get_end_klu(self) -> CKLineUnit:
+    def get_end_klu(self) -> KLineUnit:
         if self.is_up():
             return self.end_klc.get_peak_klu(is_high=True)
         else:
@@ -156,7 +161,7 @@ class CBi:
     def is_up(self):
         return self.dir == BiDirection.UP
 
-    def update_virtual_end(self, new_klc: CKLine):
+    def update_virtual_end(self, new_klc: KLine):
         self._sure_end = self.end_klc
         self.update_new_end(new_klc)
         self._is_sure = False
@@ -172,7 +177,7 @@ class CBi:
     def is_virtual_end(self):
         return self.sure_end is not None
 
-    def update_new_end(self, new_klc: CKLine):
+    def update_new_end(self, new_klc: KLine):
         self._end_klc = new_klc
         self.check()
         self.clean_cache()

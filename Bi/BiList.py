@@ -1,7 +1,7 @@
 from typing import List, Optional, Union, overload
 
 from Common.CEnum import FenxingType, KLineDir
-from KLine.KLine import CKLine
+from kline.kline import KLine
 
 from .Bi import CBi
 from .BiConfig import CBiConfig
@@ -33,7 +33,7 @@ class CBiList:
     def __len__(self):
         return len(self.bi_list)
 
-    def try_create_first_bi(self, klc: CKLine) -> bool:
+    def try_create_first_bi(self, klc: KLine) -> bool:
         for exist_free_klc in self.free_klc_lst:
             if exist_free_klc.fx == klc.fx:
                 continue
@@ -45,7 +45,7 @@ class CBiList:
         self.last_end = klc
         return False
 
-    def update_bi(self, klc: CKLine, last_klc: CKLine, cal_virtual: bool) -> bool:
+    def update_bi(self, klc: KLine, last_klc: KLine, cal_virtual: bool) -> bool:
         # klc: 倒数第二根klc
         # last_klc: 倒数第1根klc
         flag1 = self.update_bi_sure(klc)
@@ -55,7 +55,7 @@ class CBiList:
         else:
             return flag1
 
-    def can_update_peak(self, klc: CKLine):
+    def can_update_peak(self, klc: KLine):
         if self.config.bi_allow_sub_peak or len(self.bi_list) < 2:
             return False
         if self.bi_list[-1].is_down() and klc.high < self.bi_list[-1].get_begin_val():
@@ -70,7 +70,7 @@ class CBiList:
             return False
         return True
 
-    def update_bi_sure(self, klc: CKLine) -> bool:
+    def update_bi_sure(self, klc: KLine) -> bool:
         # klc: 倒数第二根klc
         _tmp_end = self.get_last_klu_of_last_bi()
         self.delete_virtual_bi()
@@ -97,7 +97,7 @@ class CBiList:
             else:
                 del self.bi_list[-1]
 
-    def try_add_virtual_bi(self, klc: CKLine, need_del_end=False):
+    def try_add_virtual_bi(self, klc: KLine, need_del_end=False):
         if need_del_end:
             self.delete_virtual_bi()
         if len(self) == 0:
@@ -126,7 +126,7 @@ class CBiList:
             self.bi_list[-2].next = self.bi_list[-1]
             self.bi_list[-1].pre = self.bi_list[-2]
 
-    def satisfy_bi_span(self, klc: CKLine, last_end: CKLine):
+    def satisfy_bi_span(self, klc: KLine, last_end: KLine):
         bi_span = self.get_klc_span(klc, last_end)
         if self.config.is_strict:
             return bi_span >= 4
@@ -142,7 +142,7 @@ class CBiList:
                 break
         return bi_span >= 3 and uint_kl_cnt >= 3
 
-    def get_klc_span(self, klc: CKLine, last_end: CKLine) -> int:
+    def get_klc_span(self, klc: KLine, last_end: KLine) -> int:
         span = klc.idx - last_end.idx
         if not self.config.gap_as_kl:
             return span
@@ -155,7 +155,7 @@ class CBiList:
             tmp_klc = tmp_klc.next
         return span
 
-    def can_make_bi(self, klc: CKLine, last_end: CKLine):
+    def can_make_bi(self, klc: KLine, last_end: KLine):
         if self.config.bi_algo == "fx":
             return True
         satisify_span = self.satisfy_bi_span(klc, last_end) if last_end.check_fx_valid(klc, self.config.bi_fx_check) else False
@@ -164,7 +164,7 @@ class CBiList:
         else:
             return satisify_span
 
-    def try_update_end(self, klc: CKLine) -> bool:
+    def try_update_end(self, klc: KLine) -> bool:
         if len(self.bi_list) == 0:
             return False
         last_bi = self.bi_list[-1]
@@ -180,7 +180,7 @@ class CBiList:
         return self.bi_list[-1].get_end_klu().idx if len(self) > 0 else None
 
 
-def end_is_peak(last_end: CKLine, cur_end: CKLine) -> bool:
+def end_is_peak(last_end: KLine, cur_end: KLine) -> bool:
     if last_end.fx == FenxingType.BOTTOM:
         cmp_thred = cur_end.high  # 或者严格点选择get_klu_max_high()
         klc = last_end.get_next()

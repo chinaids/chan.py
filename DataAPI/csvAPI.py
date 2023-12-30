@@ -5,7 +5,7 @@ from Common.CEnum import DataField, KLineType
 from Common.ChanException import CChanException, ErrCode
 from Common.CTime import CTime
 from Common.func_util import str2float
-from KLine.KLineUnit import CKLineUnit
+from kline.klineunit import KLineUnit
 
 from .CommonStockAPI import CCommonStockApi
 
@@ -73,7 +73,7 @@ class CsvAPI(CCommonStockApi):
                 continue
             if self.end_date is not None and data[self.time_column_idx] > self.end_date:
                 continue
-            yield CKLineUnit(create_item_dict(data, self.columns))
+            yield KLineUnit(create_item_dict(data, self.columns))
 
     def get_kl_data_from_file(self, file_path: str):
         if not file_path.endswith('csv'):
@@ -92,7 +92,7 @@ class CsvAPI(CCommonStockApi):
                 continue
             if self.end_date is not None and data[self.time_column_idx] > self.end_date:
                 continue
-            yield CKLineUnit(create_item_dict(data, self.columns))
+            yield KLineUnit(create_item_dict(data, self.columns))
 
     def set_basic_info(self):
         pass

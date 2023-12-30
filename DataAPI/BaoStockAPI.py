@@ -1,9 +1,9 @@
 import baostock as bs
 
-from Common.CEnum import AUTYPE, DataField, KlineType
+from Common.CEnum import AdjustmentType, DataField, KLineType
 from Common.CTime import CTime
 from Common.func_util import kltype_lt_day, str2float
-from KLine.KLineUnit import CKLineUnit
+from kline.klineunit import KLineUnit
 
 from .CommonStockAPI import CCommonStockApi
 
@@ -39,7 +39,7 @@ def parse_time_column(inp):
     return CTime(year, month, day, hour, minute)
 
 
-def GetColumnNameFromFieldList(fileds: str):
+def GetColumnNameFromFieldList(fields: str):
     _dict = {
         "time": DataField.FIELD_TIME,
         "date": DataField.FIELD_TIME,
@@ -51,13 +51,14 @@ def GetColumnNameFromFieldList(fileds: str):
         "amount": DataField.FIELD_TURNOVER,
         "turn": DataField.FIELD_TURNRATE,
     }
-    return [_dict[x] for x in fileds.split(",")]
+    return [_dict[x] for x in fields.split(",")]
 
 
 class CBaoStock(CCommonStockApi):
     is_connect = None
 
-    def __init__(self, code, k_type=KlineType.K_DAY, begin_date=None, end_date=None, autype=AUTYPE.QFQ):
+    def __init__(self, code, k_type=KLineType.K_DAY, begin_date=None, end_date=None,
+                 autype=AdjustmentType.QFQ):
         super(CBaoStock, self).__init__(code, k_type, begin_date, end_date, autype)
 
     def get_kl_data(self):
@@ -68,19 +69,19 @@ class CBaoStock(CCommonStockApi):
             fields = "time,open,high,low,close"
         else:
             fields = "date,open,high,low,close,volume,amount,turn"
-        autype_dict = {AUTYPE.QFQ: "2", AUTYPE.HFQ: "1", AUTYPE.NONE: "3"}
+        autype_dict = {AdjustmentType.QFQ: "2", AdjustmentType.HFQ: "1", AdjustmentType.NONE: "3"}
         rs = bs.query_history_k_data_plus(
             code=self.code,
             fields=fields,
             start_date=self.begin_date,
             end_date=self.end_date,
             frequency=self.__convert_type(),
-            adjustflag=autype_dict[self.autype],
+            adjustflag=autype_dict[self.adjustment],
         )
         if rs.error_code != '0':
             raise Exception(rs.error_msg)
         while rs.error_code == '0' and rs.next():
-            yield CKLineUnit(create_item_dict(rs.get_row_data(), GetColumnNameFromFieldList(fields)))
+            yield KLineUnit(create_item_dict(rs.get_row_data(), GetColumnNameFromFieldList(fields)))
 
     def set_basic_info(self):
         rs = bs.query_stock_basic(code=self.code)
@@ -103,12 +104,12 @@ class CBaoStock(CCommonStockApi):
 
     def __convert_type(self):
         _dict = {
-            KlineType.K_DAY: 'd',
-            KlineType.K_WEEK: 'w',
-            KlineType.K_MON: 'm',
-            KlineType.K_5M: '5',
-            KlineType.K_15M: '15',
-            KlineType.K_30M: '30',
-            KlineType.K_60M: '60',
+            KLineType.K_DAY: 'd',
+            KLineType.K_WEEK: 'w',
+            KLineType.K_MON: 'm',
+            KLineType.K_5M: '5',
+            KLineType.K_15M: '15',
+            KLineType.K_30M: '30',
+            KLineType.K_60M: '60',
         }
         return _dict[self.k_type]

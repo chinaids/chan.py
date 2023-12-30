@@ -1,6 +1,6 @@
-from Chan import CChan
-from ChanConfig import CChanConfig
-from Common.CEnum import AUTYPE, DataSrc, KlineType
+from chan import CChan
+from chanconfig import CChanConfig
+from Common.CEnum import AUTYPE, DataSrc, KLineType
 from DataAPI.BaoStockAPI import CBaoStock
 
 if __name__ == "__main__":
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     begin_time = "2023-06-01"
     end_time = None
     data_src = DataSrc.BAO_STOCK
-    lv_list = [KlineType.K_DAY, KlineType.K_30M]
+    lv_list = [KLineType.K_DAY, KLineType.K_30M]
 
     config = CChanConfig({
         "trigger_step": True,
@@ -32,17 +32,17 @@ if __name__ == "__main__":
         autype=AUTYPE.QFQ,  # 已经没啥用了这一行
     )
     CBaoStock.do_init()
-    data_src_day = CBaoStock(code, k_type=KlineType.K_DAY, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)
-    data_src_30m = CBaoStock(code, k_type=KlineType.K_30M, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)
+    data_src_day = CBaoStock(code, k_type=KLineType.K_DAY, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)
+    data_src_30m = CBaoStock(code, k_type=KLineType.K_30M, begin_date=begin_time, end_date=end_time, autype=AUTYPE.QFQ)
     kl_30m_all = list(data_src_30m.get_kl_data())
 
     for _idx, klu in enumerate(data_src_day.get_kl_data()):
         # 本质是每喂一根日线的时候，这根日线之前的都要喂过，提前喂多点不要紧，框架会自动根据日线来截取需要的30M K线
         # 30M一口气全部喂完，后续就不用关注时间对齐的问题了
         if _idx == 0:
-            chan.trigger_load({KlineType.K_DAY: [klu], KlineType.K_30M: kl_30m_all})
+            chan.trigger_load({KLineType.K_DAY: [klu], KLineType.K_30M: kl_30m_all})
         else:
-            chan.trigger_load({KlineType.K_DAY: [klu]})
+            chan.trigger_load({KLineType.K_DAY: [klu]})
 
         if _idx == 4:  # demo只检查4根日线
             break

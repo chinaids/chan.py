@@ -4,14 +4,14 @@ from Common.ChanException import CChanException, ErrCode
 class CCombine_Item:
     def __init__(self, item):
         from Bi.Bi import CBi
-        from KLine.KLineUnit import CKLineUnit
+        from kline.klineunit import KLineUnit
         from Seg.Seg import CSeg
         if type(item) == CBi:
             self.time_begin = item.begin_klc.idx
             self.time_end = item.end_klc.idx
             self.high = item._high()
             self.low = item._low()
-        elif type(item) == CKLineUnit:
+        elif type(item) == KLineUnit:
             self.time_begin = item.time
             self.time_end = item.time
             self.high = item.high

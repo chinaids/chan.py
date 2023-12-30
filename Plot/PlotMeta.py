@@ -1,10 +1,10 @@
 from typing import List
 
 from Bi.Bi import CBi
-from BuySellPoint.BS_Point import CBuySellPoint
+from BuySellPoint.BuySellPoint import CBuySellPoint
 from Common.CEnum import FenxingType
-from KLine.KLine import CKLine
-from KLine.KLineList import CKLine_List
+from kline.kline import KLine
+from kline.klinelist import KLineList
 from Seg.Eigen import CEigen
 from Seg.EigenFX import CEigenFX
 from Seg.Seg import CSeg
@@ -12,7 +12,7 @@ from ZS.ZS import CZS
 
 
 class Cklc_meta:
-    def __init__(self, klc: CKLine):
+    def __init__(self, klc: KLine):
         self.high = klc.high
         self.low = klc.low
         self.begin_idx = klc.lst[0].idx
@@ -115,7 +115,7 @@ class CBS_Point_meta:
 
 
 class CChanPlotMeta:
-    def __init__(self, kl_list: CKLine_List):
+    def __init__(self, kl_list: KLineList):
         self.data = kl_list
 
         self.klc_list: List[Cklc_meta] = [Cklc_meta(klc) for klc in kl_list.lst]

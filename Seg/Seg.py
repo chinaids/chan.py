@@ -3,7 +3,7 @@ from typing import Generic, List, Optional, Self, TypeVar
 from Bi.Bi import CBi
 from Common.CEnum import BiDirection, MACDAlgo, TrendLineScope
 from Common.ChanException import CChanException, ErrCode
-from KLine.KLineUnit import CKLineUnit
+from kline.klineunit import KLineUnit
 from Math.TrendLine import CTrendLine
 
 from .EigenFX import CEigenFX
@@ -29,7 +29,7 @@ class CSeg(Generic[LINE_TYPE]):
         self.pre: Optional[Self] = None
         self.next: Optional[Self] = None
 
-        from BuySellPoint.BS_Point import CBuySellPoint
+        from BuySellPoint.BuySellPoint import CBuySellPoint
         self.bsp: Optional[CBuySellPoint] = None  # 尾部是不是买卖点
 
         self.bi_list: List[LINE_TYPE] = []  # 仅通过self.update_bi_list来更新
@@ -94,10 +94,10 @@ class CSeg(Generic[LINE_TYPE]):
     def amp(self):
         return abs(self.get_end_val() - self.get_begin_val())
 
-    def get_end_klu(self) -> CKLineUnit:
+    def get_end_klu(self) -> KLineUnit:
         return self.end_bi.get_end_klu()
 
-    def get_begin_klu(self) -> CKLineUnit:
+    def get_begin_klu(self) -> KLineUnit:
         return self.start_bi.get_begin_klu()
 
     def get_klu_cnt(self):
@@ -129,7 +129,7 @@ class CSeg(Generic[LINE_TYPE]):
 
     def update_bi_list(self, bi_lst, idx1, idx2):
         for bi_idx in range(idx1, idx2+1):
-            bi_lst[bi_idx].parent_seg = self
+            # bi_lst[bi_idx].parent_seg = self
             self.bi_list.append(bi_lst[bi_idx])
         if len(self.bi_list) >= 3:
             self.support_trend_line = CTrendLine(self.bi_list, TrendLineScope.INSIDE)
