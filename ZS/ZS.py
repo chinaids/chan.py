@@ -1,6 +1,6 @@
 from typing import Generic, List, Optional, TypeVar
 
-from Bi.Bi import CBi
+from bi.Bi import CBi
 from BuySellPoint.BSPointConfig import CPointConfig
 from Common.ChanException import CChanException, ErrCode
 from Common.func_util import has_overlap

@@ -1,6 +1,6 @@
 from typing import Generic, List, Optional, Self, TypeVar
 
-from Bi.Bi import CBi
+from bi.Bi import CBi
 from Common.CEnum import BiDirection, MACDAlgo, TrendLineScope
 from Common.ChanException import CChanException, ErrCode
 from kline.klineunit import KLineUnit

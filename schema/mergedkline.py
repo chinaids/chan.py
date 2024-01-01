@@ -10,8 +10,8 @@ from Common.CEnum import FenxingType, KLineDir
 class MergedKLineUnit(BaseModel):
 
     _idx: int = -1
-    direction: KLineDir
     elements: List[KLineUnit]
+    direction: Optional[KLineDir] = None
     fenxing: Optional[FenxingType] = FenxingType.UNKNOWN
 
     @cached_property

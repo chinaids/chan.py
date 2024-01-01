@@ -1,7 +1,7 @@
 from typing import List, Union, overload
 
-from Bi.Bi import CBi
-from Bi.BiList import CBiList
+from bi.Bi import CBi
+from bi.BiList import CBiList
 from Common.func_util import revert_bi_dir
 from Seg.Seg import CSeg
 from Seg.SegListComm import CSegListComm

@@ -1,7 +1,7 @@
 from typing import Generic, List, Optional, TypeVar, Union, overload
 
-from Bi.Bi import CBi
-from Bi.BiList import CBiList
+from bi.Bi import CBi
+from bi.BiList import CBiList
 from Common.CEnum import BuySellPointType
 from Common.func_util import has_overlap
 from Seg.Seg import CSeg

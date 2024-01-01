@@ -1,6 +1,6 @@
 from typing import Dict, Generic, List, Optional, TypeVar, Union
 
-from Bi.Bi import CBi
+from bi.Bi import CBi
 from ChanModel.Features import CFeatures
 from Common.CEnum import BuySellPointType
 from Seg.Seg import CSeg

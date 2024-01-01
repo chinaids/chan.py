@@ -1,6 +1,6 @@
 from typing import List
 
-from Bi.BiConfig import CBiConfig
+from bi.BiConfig import CBiConfig
 from BuySellPoint.BSPointConfig import CBSPointConfig
 from Common.CEnum import TrendType
 from Common.ChanException import CChanException, ErrCode

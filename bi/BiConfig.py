@@ -21,7 +21,7 @@ class CBiConfig:
         elif bi_fx_check == "half":
             self.bi_fx_check = FenxingCheckMethod.HALF
         elif bi_fx_check == 'totally':
-            self.bi_fx_check = FenxingCheckMethod.TOTALLY
+            self.bi_fx_check = FenxingCheckMethod.COMPLETE
         else:
             raise CChanException(f"unknown bi_fx_check={bi_fx_check}", ErrCode.PARA_ERROR)
 

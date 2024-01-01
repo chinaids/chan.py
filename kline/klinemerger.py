@@ -4,7 +4,6 @@ from typing import Literal, Iterable, List, Optional, Self, TypeVar, Union, over
 from Common.cache import make_cache
 from Common.CEnum import FenxingType, KLineDir
 from Common.ChanException import CChanException, ErrCode
-# from kline.klineunit import KLineUnit
 from schema.klineunit import KLineUnit
 from schema.mergedkline import MergedKLineUnit, MergedKLine
 
@@ -14,68 +13,20 @@ T = TypeVar('T')
 
 
 class KLineMerger:
-    """
-    Given a list of K line units, return a list of merged K line
-    """
 
     def __init__(self,
                  exclude_included: bool = False,
                  allow_top_equal: Literal[-1, 1] = None
                  ):
+        """
+        allow_top_equal = None普通模式
+        allow_top_equal = 1 被包含，顶部相等不合并
+        allow_top_equal = -1 被包含，底部相等不合并
+        """
 
         self.exclude_included = exclude_included
         self.allow_top_equal = allow_top_equal
-        # allow_top_equal = None普通模式
-        # allow_top_equal = 1 被包含，顶部相等不合并
-        # allow_top_equal = -1 被包含，底部相等不合并
 
-        # self.__time_begin = item.time_begin
-        # self.__time_end = item.time_end
-        # self.__high = item.high
-        # self.__low = item.low
-        #
-        # self.__lst: List[T] = [kl_unit]  # 本级别每一根单位K线
-        #
-        # # self.__dir = _dir
-        # self.__fx = FenxingType.UNKNOWN
-        # self.__pre: Optional[Self] = None
-        # self.__next: Optional[Self] = None
-
-    # def clean_cache(self):
-    #     self._memoize_cache = {}
-
-    # @property
-    # def time_begin(self): return self.__time_begin
-    #
-    # @property
-    # def time_end(self): return self.__time_end
-    #
-    # @property
-    # def high(self): return self.__high
-    #
-    # @property
-    # def low(self): return self.__low
-    #
-    # @property
-    # def lst(self): return self.__lst
-    #
-    # @property
-    # def dir(self): return self.__dir
-    #
-    # @property
-    # def fx(self): return self.__fx
-    #
-    # @property
-    # def pre(self) -> Self:
-    #     assert self.__pre is not None
-    #     return self.__pre
-    #
-    # @property
-    # def next(self): return self.__next
-    #
-    # def get_next(self) -> Self:
-    #     assert self.next is not None
-    #     return self.next
     @staticmethod
     def clear_merged_cache(merged: MergedKLineUnit):
         attr_list = ['begin_time', 'end_time', 'open', 'close', 'high', 'low',
@@ -108,22 +59,30 @@ class KLineMerger:
     #     # only for deepcopy
     #     self.__fx = fx
 
-    def merge_item(self, item: KLineUnit, merged: MergedKLineUnit) -> KLineDir:
+    def merge_single_item(self, item: KLineUnit, merged: MergedKLineUnit) -> KLineDir:
+        """
+        - 假设，第 n 根 K 线满足第 n 根与第 n+1 根的包含关系，而第 n 根与第 n-1 根不是包含关系，那么如果 gn>=gn-1，那么称第 n-1、n、n+1 根 K 线是向上的；
+        - 如果 dn<=dn-1，那么称第 n-1、n、n+1根 K 线是向下的。
+        - 有人可能又要问，如果 gn<gn-1 且 dn>dn-1，算什么？那就是一种包含关系，这就违反了前面第 n根与第 n-1 根不是包含关系的假设。
+        - 同样道理，gn>=gn-1 与 dn<=dn-1 不可能同时成立。
 
+        """
         _dir = self.check_merge(item, merged)
         if _dir == KLineDir.COMBINE:
             merged.elements.append(item)
             self.clear_merged_cache(merged)
+        # else:
+        #     if not merged.direction:
+        #         print('update merged direction to:', _dir)
+        #         merged.direction = _dir
 
         # 返回UP/DOWN/COMBINE给KL_LIST，设置下一个的方向
         return _dir
 
-
     def update_fx(self, pre: MergedKLineUnit, mid: MergedKLineUnit, nxt: MergedKLineUnit):
         """
-        update fenxing type of mid
+        Update fenxing type of mid
         """
-
         if self.exclude_included:
             if pre.high < mid.high and nxt.high <= mid.high and nxt.low < mid.low:
                 if self.allow_top_equal == 1 or nxt.high < mid.high:
@@ -135,6 +94,43 @@ class KLineMerger:
             mid.fenxing = FenxingType.TOP
         elif pre.high > mid.high and nxt.high > mid.high and pre.low > mid.low and nxt.low > mid.low:
             mid.fenxing = FenxingType.BOTTOM
+
+    def merge_klineunits(self, units: List[KLineUnit]) -> List[MergedKLineUnit]:
+        """
+        Given a list of K line units, return a list of merged K line
+        """
+        first_merged = MergedKLineUnit(elements=[units[0]])
+        not_contain_idx = 1
+        for u in units[1:]:
+            _dir = self.check_merge(u, first_merged)
+            if _dir == KLineDir.COMBINE:
+                first_merged.elements.append(u)
+                not_contain_idx += 1
+            else:
+                first_merged.direction = _dir
+                break  # merge until the first kline that is not contained
+
+        merged_list = [first_merged]
+        merged = MergedKLineUnit(elements=[units[not_contain_idx]])
+
+        for u in units[not_contain_idx+1:]:
+            _dir = self.check_merge(u, merged)
+            if _dir == KLineDir.COMBINE:
+                merged.elements.append(u)
+                self.clear_merged_cache(merged)
+            else:
+                merged.direction = _dir
+                merged_list.append(merged)
+                merged = MergedKLineUnit(elements=[u])
+
+        if merged.elements[0].time != merged_list[-1].elements[0].time:
+            merged_list.append(merged)
+
+        return merged_list
+
+
+
+
 
     # def __str__(self):
     #     return f"{self.time_begin}~{self.time_end} {self.low}->{self.high}"

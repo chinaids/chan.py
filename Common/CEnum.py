@@ -30,9 +30,9 @@ class KLineDir(Enum):
 
 
 class FenxingType(Enum):
-    BOTTOM = auto()
-    TOP = auto()
-    UNKNOWN = auto()
+    BOTTOM = 'bottom'
+    TOP = 'top'
+    UNKNOWN = 'unknown'
 
 
 class BiDirection(Enum):
@@ -89,10 +89,10 @@ class LeftSegMethod(Enum):
 
 
 class FenxingCheckMethod(Enum):
-    STRICT = auto()
-    LOSS = auto()
-    HALF = auto()
-    TOTALLY = auto()
+    STRICT = 'strict'
+    LOSS = 'loss'
+    HALF = 'half'
+    COMPLETE = 'complete'
 
 
 class SegType(Enum):

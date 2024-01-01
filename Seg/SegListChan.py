@@ -1,4 +1,4 @@
-from Bi.BiList import CBiList
+from bi.BiList import CBiList
 from Common.CEnum import BiDirection, SegType
 
 from .EigenFX import CEigenFX

@@ -3,7 +3,7 @@ from Common.ChanException import CChanException, ErrCode
 
 class CCombine_Item:
     def __init__(self, item):
-        from Bi.Bi import CBi
+        from bi.Bi import CBi
         from kline.klineunit import KLineUnit
         from Seg.Seg import CSeg
         if type(item) == CBi:

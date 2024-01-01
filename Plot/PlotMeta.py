@@ -1,6 +1,6 @@
 from typing import List
 
-from Bi.Bi import CBi
+from bi.Bi import CBi
 from BuySellPoint.BuySellPoint import CBuySellPoint
 from Common.CEnum import FenxingType
 from kline.kline import KLine

@@ -55,7 +55,7 @@ class KLine(CKLine_Combiner[KLineUnit]):
             elif method == FenxingCheckMethod.LOSS:  # 只检测顶底分形KLC
                 item2_high = item2.high
                 self_low = self.low
-            elif method in (FenxingCheckMethod.STRICT, FenxingCheckMethod.TOTALLY):
+            elif method in (FenxingCheckMethod.STRICT, FenxingCheckMethod.COMPLETE):
                 if for_virtual:
                     item2_high = max([item2.pre.high, item2.high])
                 else:
@@ -64,7 +64,7 @@ class KLine(CKLine_Combiner[KLineUnit]):
                 self_low = min([self.pre.low, self.low, self.next.low])
             else:
                 raise CChanException("bi_fx_check config error!", ErrCode.CONFIG_ERROR)
-            if method == FenxingCheckMethod.TOTALLY:
+            if method == FenxingCheckMethod.COMPLETE:
                 return self.low > item2_high
             else:
                 return self.high > item2_high and item2.low < self_low
@@ -76,7 +76,7 @@ class KLine(CKLine_Combiner[KLineUnit]):
             elif method == FenxingCheckMethod.LOSS:
                 item2_low = item2.low
                 cur_high = self.high
-            elif method in (FenxingCheckMethod.STRICT, FenxingCheckMethod.TOTALLY):
+            elif method in (FenxingCheckMethod.STRICT, FenxingCheckMethod.COMPLETE):
                 if for_virtual:
                     item2_low = min([item2.pre.low, item2.low])
                 else:
@@ -85,7 +85,7 @@ class KLine(CKLine_Combiner[KLineUnit]):
                 cur_high = max([self.pre.high, self.high, self.next.high])
             else:
                 raise CChanException("bi_fx_check config error!", ErrCode.CONFIG_ERROR)
-            if method == FenxingCheckMethod.TOTALLY:
+            if method == FenxingCheckMethod.COMPLETE:
                 return self.high < item2_low
             else:
                 return self.low < item2_low and item2.high > cur_high

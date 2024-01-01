@@ -3,10 +3,6 @@ from typing import Literal, Optional
 
 from schema.ctime import CTime
 
-# from .kline import KLine
-from Common.CEnum import DataField, TRADE_INFO_LST, TrendType
-from Common.ChanException import CChanException, ErrCode
-
 
 class KLineUnit(BaseModel):
     _idx: int = -1
@@ -16,7 +12,7 @@ class KLineUnit(BaseModel):
     high: float
     low: float
     volume: Optional[float] = None
-    turnover: Optional[float] = None # 交易量
+    turnover: Optional[float] = None  # 交易量
     limit_flag: Literal['normal', 'up_limit', 'down_limit', 'suspended'] = 'normal'
 
     @model_validator(mode='after')

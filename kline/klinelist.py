@@ -1,8 +1,8 @@
 import copy
 from typing import List, Union, overload
 
-from Bi.Bi import CBi
-from Bi.BiList import CBiList
+from bi.Bi import CBi
+from bi.BiList import CBiList
 from BuySellPoint.BSPointList import CBSPointList
 from chanconfig import CChanConfig
 from Common.CEnum import KLineDir, SegType

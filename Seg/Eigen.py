@@ -1,4 +1,4 @@
-from Bi.Bi import CBi
+from bi.Bi import CBi
 from Combiner.KLine_Combiner import CKLine_Combiner
 from Common.CEnum import BiDirection, FenxingType
 

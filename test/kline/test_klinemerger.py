@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 
 from kline.klinemerger import KLineMerger
 from schema.ctime import CTime
@@ -6,6 +7,21 @@ from schema.klineunit import KLineUnit
 from schema.mergedkline import MergedKLineUnit, MergedKLine
 
 from Common.CEnum import FenxingType, KLineDir
+
+
+@pytest.fixture()
+def k_lines():
+    data_path = 'test/data/kline_100days.csv'
+    data = pd.read_csv(data_path, index_col=0)
+    klines = []
+    for idx, row in data.iterrows():
+        date = [int(d) for d in row['date'].split('-')]
+        t = CTime(year=date[0], month=date[1], day=date[2])
+        kline = KLineUnit(time=t, open=row['open'], close=row['close'],
+                          high=row['high'], low=row['low'])
+        klines.append(kline)
+
+    return klines
 
 
 class TestKLineMerger:
@@ -73,3 +89,33 @@ class TestKLineMerger:
         merger.update_fx(merged1, merged2, merged3)
         assert merged2.fenxing == FenxingType.BOTTOM
 
+    def test_merge_klineunits(self, k_lines):
+
+        merger = KLineMerger()
+        merged = merger.merge_klineunits(k_lines)
+
+        merged_elements = [len(m.elements) for m in merged]
+        # print('total elements:', len(k_lines), sum(merged_elements))
+        assert len(k_lines) == sum(merged_elements)
+
+        # merged_dates = []
+        for pre_m, m in zip(merged[:-1], merged[1:]):
+            if m.direction == KLineDir.UP:
+                print(pre_m.direction, pre_m.begin_time, pre_m.high)
+                print(m.begin_time, m.high)
+                print('-'*20)
+                # break
+            # merged_dates.extend([str(e.time) for e in m.elements])
+            # if len(m.elements) > 1:
+            #     print(m.high, m.low, m.direction)
+            #     inside = [(e.time, e.high, e.low, e.open, e.close) for e in m.elements]
+            #     print('merged: ', len(m.elements))
+            #     for i in inside:
+            #         print(i)
+            #     print('-'*20)
+            # else:
+            #     print('single:', m.elements[0].time, m.high, m.low, m.direction)
+            #     print('=' * 20)
+            # break
+        # from collections import Counter
+        # print(Counter(merged_dates).most_common(2))
