@@ -37,8 +37,8 @@ from kline.klineunit import KLineUnit
 
 class ChanStatic:
     """
-    load history data at initialization
-    calculate chan elements with loaded K lines
+    Load history data at initialization
+    Calculate chan elements with loaded K lines
     """
     def __init__(self, code, begin_time=None, end_time=None,
                  data_src: Union[DataSrc, str] = DataSrc.BAO_STOCK,

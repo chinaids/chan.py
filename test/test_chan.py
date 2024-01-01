@@ -1,6 +1,6 @@
 import pytest
 from chan.chan import CChan
-from chan.hanconfig import CChanConfig
+from chan.chanconfig import CChanConfig
 from Common.CEnum import AdjustmentType, DataSrc, KLineType
 
 
