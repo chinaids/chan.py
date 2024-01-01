@@ -1,28 +1,18 @@
 from pydantic import BaseModel, field_validator
-from typing import List, Literal, Any
+from typing import List, Optional
 from functools import cached_property
 
-# from pydantic.main import Model
-
 from schema.klineunit import KLineUnit
-from Common.CTime import CTime
 from Common.CEnum import FenxingType, KLineDir
 
 
 # 合并后的K线
 class MergedKLineUnit(BaseModel):
+
     _idx: int = -1
-    # begin_time: CTime
-    # end_time: CTime
-    # open: float  # open price of the first kline
-    # close: float  # close price of the last kline
-    # high: float
-    # low: float
-    # volume: Optional[float]  # sum of volume
-    # turnover: Optional[float]  # sum of turnover
-    # level: Optional[str] = 'day'
     direction: KLineDir
     elements: List[KLineUnit]
+    fenxing: Optional[FenxingType] = FenxingType.UNKNOWN
 
     @cached_property
     def begin_time(self):
@@ -59,6 +49,23 @@ class MergedKLineUnit(BaseModel):
     def turnover(self):
         to = [e.turnover for e in self.elements if e.turnover]
         return sum(to) if to else None
+
+    def get_peak_klu(self, is_high) -> KLineUnit:
+        # 获取最大值 or 最小值所在 KLineUnit
+        return self.get_high_peak_klu() if is_high else self.get_low_peak_klu()
+
+    def get_high_peak_klu(self) -> KLineUnit:
+        for kl in self.elements[::-1]:
+            if kl.high == self.high:
+                return kl
+        raise ValueError(f"can't find peak with high price {self.high}")
+
+    def get_low_peak_klu(self) -> KLineUnit:
+        for kl in self.elements[::-1]:
+            if kl.low == self.low:
+                return kl
+        raise ValueError(f"can't find bottom with low price {self.low}")
+
 
     # @field_validator('direction', mode='after')
     # # @classmethod
